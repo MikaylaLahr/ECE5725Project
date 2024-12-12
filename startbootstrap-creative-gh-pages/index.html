@@ -162,7 +162,20 @@
                         <h3 class="text-black mt-0">Hardware Design and Testing</h3>
                         </div>
                         <div class="col-lg-8 text-left">
-                        <p class="text-black-75 mb-4"></p>
+                        <p class="text-black-75 mb-4">After deciding on an initial design, we started to assemble the hardware. The hardware included the 
+                            Raspberry-Pi, piTFT screen, and a 32x32 LED matrix. The Lab 3 kernel was used for the final project. The Raspberry-Pi was powered 
+                            by the lab provided Raspberry-Pi power supply. The LED matrix was powered by a 5V power supply that attached directly to the back 
+                            of the matrix. The LED matrix was attached to the Raspberry-Pi using a breadboard. The LED matrix had 16 pins that needed to be 
+                            connected to the Raspberry-Pi. A diagram of the hardware is below:
+                        </p>
+                        <div class="col-lg-8 text-center">
+                            <p>Figure 1: Hardware System</p>
+                        </div>
+                        <div class="col-lg-8 text-left">
+                            <p>Below is a table indicating what GPIO pins on the Raspberry-Pi were used to connect to the pins on the LED matrix.</p>
+                        </div>
+                        <div class="col-lg-8 text-center">
+                            <p>Table 1: Raspberry-Pi to LED Matrix Wiring</p>
                         <table>
                           <tr>
                             <th>Raspberry-Pi Pin</th>
@@ -170,21 +183,77 @@
                           	<th>Signal</th>
                           </tr>
                           <tr>
-                          	<td>Anna Fitzgerald</td>
-                          	<td>Staff Writer</td>
-                          	<td>example@company.com</td>
+                          	<td>GPIO 5</td>
+                          	<td>1</td>
+                          	<td>Red Row 1</td>
                           </tr>
                           <tr>
-                          	<td>John Smith</td>
-                          	<td>Marketing Manager</td>
-                          	<td>example2@company.com</td>
+                          	<td>GPIO 13</td>
+                          	<td>2</td>
+                          	<td>Green Row 1</td>
                           </tr>
                           <tr>
-                          	<td>Zendaya Grace</td>
-                          	<td>CEO</td>
-                          	<td>example2@company.com</td>
+                          	<td>GPIO 6</td>
+                          	<td>3</td>
+                          	<td>Blue Row 1</td>
+                          </tr>
+                          <tr>
+                          	<td>GPIO 12</td>
+                          	<td>5</td>
+                          	<td>Red Row 2</td>
+                          </tr>
+                          <tr>
+                          	<td>GPIO 16</td>
+                          	<td>6</td>
+                          	<td>Green Row 2</td>
+                          </tr>
+                          <tr>
+                          	<td>GPIO 23</td>
+                          	<td>7</td>
+                          	<td>Blue Row 2</td>
+                          </tr>
+                          <tr>
+                          	<td>GPIO 22</td>
+                          	<td>9</td>
+                          	<td>Line Selection A</td>
+                          </tr>
+                          <tr>
+                          	<td>GPIO 26</td>
+                          	<td>10</td>
+                          	<td>Line Selection B</td>
+                          </tr>
+                          <tr>
+                          	<td>GPIO 24</td>
+                          	<td>11</td>
+                          	<td>Line Selection C</td>
+                          </tr>
+                          <tr>
+                          	<td>GPIO 20</td>
+                          	<td>12</td>
+                          	<td>Line Selection D</td>
+                          </tr>
+                          <tr>
+                          	<td>GPIO 17</td>
+                          	<td>13</td>
+                          	<td>Clock Pin</td>
+                          </tr>
+                          <tr>
+                          	<td>GPIO 21</td>
+                          	<td>14</td>
+                          	<td>Latch Pin</td>
+                          </tr>
+                          <tr>
+                          	<td>GPIO 4</td>
+                          	<td>15</td>
+                          	<td>Output Enable</td>
+                          </tr>
+                          <tr>
+                          	<td>GND</td>
+                          	<td>4,8,16</td>
+                          	<td>Ground</td>
                           </tr>
                         </table>
+                        </div>
                         </div>
                         <div class="col-lg-8 text-center">
                         <h3 class="text-black mt-0">Software Design and Testing</h3>
@@ -193,6 +262,18 @@
                         <p class="text-black-75 mb-4"></p>
                         </div>
                         <!-- <a class="btn btn-light btn-xl" href="#services">Get Started!</a> -->
+                        </div>
+                        <div class="col-lg-8 text-left">
+                            <p>The hardware was tested by using a python code from Adafruit found here:. The code is attached at the end of the report. 
+                                When testing the code we saw several LEDs light up in colors red, white, and green. The code was written for a 16x32 LED
+                                matrix, which resulted some of the LEDs not turning on during the initial test. We changed the code to be correctly sized 
+                                for a 32x32 LED matrix by changing the range and adding a d_pin to 'set_row()' in the code. 
+                            </p>
+                            <p>During testing of the hardware we initially used a power supply that was powered by the lab power supply. At times, the LED 
+                                matrix would not turn on when powered if there was not enough voltage from the power supply. We switched the power supply to 
+                                a 5V plug in connector to an outlet. This provides a more reliable voltage for the LED matrix and we had no further issues 
+                                with powering the LEDs. 
+                            </p>
                         </div>
                     </div>
                 </div>
