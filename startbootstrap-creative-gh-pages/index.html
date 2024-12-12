@@ -114,7 +114,7 @@
                 </div>
             </div>
         </section>
-        <!-- Design and Testing-->
+        <!-- Design and Testing--> 
         <section class="page-section" id="design">
             <div class="container px-4 px-lg-5">
                 <div class="row gx-4 gx-lg-5 justify-content-center">
@@ -122,7 +122,33 @@
                         <h2 class="text-black mt-0">Design and Testing</h2>
                         <hr class="divider divider-dark" /> 
                         <h3 class="text-black mt-0">Initial Design Plans</h3>
-                        <p class="text-black-75 mb-4"></p>
+                        <p class="text-black-75 mb-4">After we decided to do a weather map using LEDs for the project, we started thinking of potential 
+                            implementation ideas of various features for the design. For hardware implementation we considered using LED strips for the 
+                            map. This approach would involve sautering the LED strips together everytime the strip was cut. Instead of sautering the LED
+                            strips together we decided to use a 32x32 LED mmatrix. This decision helped us remove sautering time and allowed us to focus 
+                            on implementing more features of the system, while removing the concern for potential hardware issues from incomplete 
+                            sautering. In addition, when planning the map we initially considered doing the entire United States. We decided that the area 
+                            was too large to get the detail in location that we wanted the system to have and reduced the size to the northeast United States.
+                            We further reduced the area to New York State after testing out different size maps on the LED matrix. 
+                            One of the earliest ideas that we decided on for the software implementation was the ability for the
+                            system to display the desired numerical weather data on the piTFT screen while the associated color was assigned to the LED 
+                            for the location of that data point. We considered many different data points before deciding on a design. These data points 
+                            included:
+                        </p>
+                        <li>Temperature</li>
+                        <li>Humidity</li>
+                        <li>Wind</li>
+                        <li>Snow/Rain</li>
+                        <li>Clouds</li>
+                        <li>Pressure</li>
+                        <li>Sunrise/Sunset</li>
+                        <li>Real Time Data</li>
+                        <li>Future Data</li>
+                        <p>We wanted to implement multiple types of data collection that we could switch between to make sure that the LEDs were updating 
+                            the new data and color correctly. We used Open Weather Map to collect the weather data using an API key. The free plan did not 
+                            include access to future predicted data and we could only use real time data. We decided to collect temperature, humidity, and 
+                            cloud/rain/snow data.
+                        </p>
                         <h3 class="text-black mt-0">Hardware Design and Testing</h3>
                         <p class="text-black-75 mb-4"></p>
                         <h3 class="text-black mt-0">Software Design and Testing</h3>
