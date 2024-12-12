@@ -271,14 +271,24 @@
                         <h3 class="text-black mt-0">Software Design and Testing</h3>
                         </div>
                         <div class="col-lg-8 text-left">
-                        <p class="text-black-75 mb-4">The first step for software testing that was performed was getting an API key and collecting weather data.
-                            We signed up for an account on Open Weather Map and got an API key from the website. 
+                        <p class="text-black-75 mb-4">Setup API Key</p>
+                        <p>The first step for software testing that was performed was getting an API key and collecting weather data.
+                            We signed up for an account on Open Weather Map and got an API key from the website. The free plan allows for 60 calls a minute 
+                            and 1,000,000 calls a month. The API key was implemented in the code API.py and API_with_LED.py that can be found at the end 
+                            of the report. Throughout our progress on this project we made several updates to how we implemented the API call. Initially we 
+                            used the latitude and longitude coordinates for the API call for the starting locations. 
                         </p>
+                        <p>response = requests.get(f"https://api.openweathermap.org/data/2.5/weather?lat={42.1435257}&lon={-77.0543408}&appid={api_key}",verify=False)    
+                        </p>
+                        <p>This approach was time consuming to find the correct latitude and longitude numbers for each </p>
+                        <p>Setup LED Map</p>
+                        <p>Main Code Setup and Integrate Data Collection</p>
+                        <p>Relative Temperature</p>
+                        <p>Relative Humidity</p>
+                        <p>Temperature</p>
+                        <p>Cities and Towns</p>
                         </div>
                         <!-- <a class="btn btn-light btn-xl" href="#services">Get Started!</a> -->
-                        </div>
-                        <div class="col-lg-8 text-left">
-                            <p> </p>
                         </div>
                     </div>
                 </div>
@@ -356,113 +366,14 @@
                     <div class="col-lg-8 text-center">
                         <h2 class="text-black mt-0">Code Appendix</h2>
                         <hr class="divider divider-dark" /> 
-                        <p class="text-black-75 mb-4">Start Bootstrap has everything you need to get your new website up and running in no time! Choose one of our open source, free to download, and easy to use themes! No strings attached!</p>
-                        <!-- <a class="btn btn-light btn-xl" href="#services">Get Started!</a> -->
-                        <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">RPi.GPIO</span> <span style="color: #008800; font-weight: bold">as</span> <span style="color: #0e84b5; font-weight: bold">GPIO</span>
-<span style="color: #008800; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">time</span>
-
-delay <span style="color: #333333">=</span> <span style="color: #6600EE; font-weight: bold">0.000001</span>
-
-GPIO<span style="color: #333333">.</span>setmode(GPIO<span style="color: #333333">.</span>BCM)
-red1_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">5</span>
-green1_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">13</span>
-blue1_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">6</span>
-red2_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">12</span>
-green2_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">16</span>
-blue2_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">23</span>
-clock_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">17</span>
-a_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">22</span>
-b_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">26</span>
-c_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">27</span>
-d_pin  <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">20</span>
-latch_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">21</span>
-oe_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">4</span>
-
-GPIO<span style="color: #333333">.</span>setup(red1_pin, GPIO<span style="color: #333333">.</span>OUT)
-GPIO<span style="color: #333333">.</span>setup(green1_pin, GPIO<span style="color: #333333">.</span>OUT)
-GPIO<span style="color: #333333">.</span>setup(blue1_pin, GPIO<span style="color: #333333">.</span>OUT)
-GPIO<span style="color: #333333">.</span>setup(red2_pin, GPIO<span style="color: #333333">.</span>OUT)
-GPIO<span style="color: #333333">.</span>setup(green2_pin, GPIO<span style="color: #333333">.</span>OUT)
-GPIO<span style="color: #333333">.</span>setup(blue2_pin, GPIO<span style="color: #333333">.</span>OUT)
-GPIO<span style="color: #333333">.</span>setup(clock_pin, GPIO<span style="color: #333333">.</span>OUT)
-GPIO<span style="color: #333333">.</span>setup(a_pin, GPIO<span style="color: #333333">.</span>OUT)
-GPIO<span style="color: #333333">.</span>setup(b_pin, GPIO<span style="color: #333333">.</span>OUT)
-GPIO<span style="color: #333333">.</span>setup(c_pin, GPIO<span style="color: #333333">.</span>OUT)
-GPIO<span style="color: #333333">.</span>setup(latch_pin, GPIO<span style="color: #333333">.</span>OUT)
-GPIO<span style="color: #333333">.</span>setup(oe_pin, GPIO<span style="color: #333333">.</span>OUT)
-
-screen <span style="color: #333333">=</span> [[<span style="color: #0000DD; font-weight: bold">0</span> <span style="color: #008800; font-weight: bold">for</span> x <span style="color: #000000; font-weight: bold">in</span> <span style="color: #007020">range</span>(<span style="color: #0000DD; font-weight: bold">32</span>)] <span style="color: #008800; font-weight: bold">for</span> x <span style="color: #000000; font-weight: bold">in</span> <span style="color: #007020">range</span>(<span style="color: #0000DD; font-weight: bold">16</span>)]
-
-<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">clock</span>():
-    GPIO<span style="color: #333333">.</span>output(clock_pin, <span style="color: #0000DD; font-weight: bold">1</span>)
-    GPIO<span style="color: #333333">.</span>output(clock_pin, <span style="color: #0000DD; font-weight: bold">0</span>)
-
-<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">latch</span>():
-    GPIO<span style="color: #333333">.</span>output(latch_pin, <span style="color: #0000DD; font-weight: bold">1</span>)
-    GPIO<span style="color: #333333">.</span>output(latch_pin, <span style="color: #0000DD; font-weight: bold">0</span>)
-
-<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">bits_from_int</span>(x):
-    a_bit <span style="color: #333333">=</span> x <span style="color: #333333">&amp;</span> <span style="color: #0000DD; font-weight: bold">1</span>
-    b_bit <span style="color: #333333">=</span> x <span style="color: #333333">&amp;</span> <span style="color: #0000DD; font-weight: bold">2</span>
-    c_bit <span style="color: #333333">=</span> x <span style="color: #333333">&amp;</span> <span style="color: #0000DD; font-weight: bold">4</span>
-    <span style="color: #008800; font-weight: bold">return</span> (a_bit, b_bit, c_bit)
-
-<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">set_row</span>(row):
-    <span style="color: #888888">#time.sleep(delay)</span>
-    a_bit, b_bit, c_bit <span style="color: #333333">=</span> bits_from_int(row)
-    GPIO<span style="color: #333333">.</span>output(a_pin, a_bit)
-    GPIO<span style="color: #333333">.</span>output(b_pin, b_bit)
-    GPIO<span style="color: #333333">.</span>output(c_pin, c_bit)
-    <span style="color: #888888">#time.sleep(delay)</span>
-
-<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">set_color_top</span>(color):
-    <span style="color: #888888">#time.sleep(delay)</span>
-    red, green, blue <span style="color: #333333">=</span> bits_from_int(color)
-    GPIO<span style="color: #333333">.</span>output(red1_pin, red)
-    GPIO<span style="color: #333333">.</span>output(green1_pin, green)
-    GPIO<span style="color: #333333">.</span>output(blue1_pin, blue)
-    <span style="color: #888888">#time.sleep(delay)</span>
-
-<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">set_color_bottom</span>(color):
-    <span style="color: #888888">#time.sleep(delay)</span>
-    red, green, blue <span style="color: #333333">=</span> bits_from_int(color)
-    GPIO<span style="color: #333333">.</span>output(red2_pin, red)
-    GPIO<span style="color: #333333">.</span>output(green2_pin, green)
-    GPIO<span style="color: #333333">.</span>output(blue2_pin, blue)
-    <span style="color: #888888">#time.sleep(delay)</span>
-
-<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">refresh</span>():
-    <span style="color: #008800; font-weight: bold">for</span> row <span style="color: #000000; font-weight: bold">in</span> <span style="color: #007020">range</span>(<span style="color: #0000DD; font-weight: bold">8</span>):
-        GPIO<span style="color: #333333">.</span>output(oe_pin, <span style="color: #0000DD; font-weight: bold">1</span>)
-        set_color_top(<span style="color: #0000DD; font-weight: bold">0</span>)
-        set_row(row)
-        <span style="color: #888888">#time.sleep(delay)</span>
-        <span style="color: #008800; font-weight: bold">for</span> col <span style="color: #000000; font-weight: bold">in</span> <span style="color: #007020">range</span>(<span style="color: #0000DD; font-weight: bold">32</span>):
-            set_color_top(screen[row][col])
-            set_color_bottom(screen[row<span style="color: #333333">+</span><span style="color: #0000DD; font-weight: bold">8</span>][col])
-            clock()
-        <span style="color: #888888">#GPIO.output(oe_pin, 0)</span>
-        latch()
-        GPIO<span style="color: #333333">.</span>output(oe_pin, <span style="color: #0000DD; font-weight: bold">0</span>)
-        time<span style="color: #333333">.</span>sleep(delay)
-
-<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">fill_rectangle</span>(x1, y1, x2, y2, color):
-    <span style="color: #008800; font-weight: bold">for</span> x <span style="color: #000000; font-weight: bold">in</span> <span style="color: #007020">range</span>(x1, x2):
-        <span style="color: #008800; font-weight: bold">for</span> y <span style="color: #000000; font-weight: bold">in</span> <span style="color: #007020">range</span>(y1, y2):
-            screen[y][x] <span style="color: #333333">=</span> color
-
-
-<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">set_pixel</span>(x, y, color):
-    screen[y][x] <span style="color: #333333">=</span> color
-
-fill_rectangle(<span style="color: #0000DD; font-weight: bold">0</span>, <span style="color: #0000DD; font-weight: bold">0</span>, <span style="color: #0000DD; font-weight: bold">12</span>, <span style="color: #0000DD; font-weight: bold">12</span>, <span style="color: #0000DD; font-weight: bold">1</span>)
-fill_rectangle(<span style="color: #0000DD; font-weight: bold">20</span>, <span style="color: #0000DD; font-weight: bold">4</span>, <span style="color: #0000DD; font-weight: bold">30</span>, <span style="color: #0000DD; font-weight: bold">15</span>, <span style="color: #0000DD; font-weight: bold">2</span>)
-fill_rectangle(<span style="color: #0000DD; font-weight: bold">15</span>, <span style="color: #0000DD; font-weight: bold">0</span>, <span style="color: #0000DD; font-weight: bold">19</span>, <span style="color: #0000DD; font-weight: bold">7</span>, <span style="color: #0000DD; font-weight: bold">7</span>)
-
-<span style="color: #008800; font-weight: bold">while</span> <span style="color: #007020">True</span>:
-    refresh()
-</pre></div>
-
+                    </div>
+                    <div class="col-lg-8 text-left">
+                        <p class="text-black-75 mb-4">testLED.py</p>
+                        <p>workingLED.py</p>
+                        <p>getCity.py</p>
+                        <p>API.py</p>
+                        <p>API_with_LED.py</p>
+                        <p>screen_with_LED.py</p>
                     </div>
                 </div>
             </div>
