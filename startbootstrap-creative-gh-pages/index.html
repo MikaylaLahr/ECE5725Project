@@ -32,7 +32,6 @@
                         <li class="nav-item"><a class="nav-link" href="#design">Design</a></li>
                         <li class="nav-item"><a class="nav-link" href="#results">Results</a></li>
                         <li class="nav-item"><a class="nav-link" href="#conclusions">Conclusions</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#team">Team</a></li>
                         <li class="nav-item"><a class="nav-link" href="#code">Code</a></li>
                     </ul>
                 </div>
@@ -62,7 +61,11 @@
                     <div class="col-lg-8 text-center">
                         <h2 class="text-black mt-0">Objective</h2>
                         <hr class="divider divider-dark" /> 
-                        <p class="text-black-75 mb-4">test</p>
+                        <p class="text-black-75 mb-4">The objective of this project is to design and test a real time weather map using a Raspberry Pi, piTFT screen, 
+                            and a 32x32 LED Matrix. An API from Open Weather Map is used to collect temperature and humidity weather data for 
+                            17 locations in New York State. The collected weather data is then displayed on the piTFT screen and the LEDs corresponding 
+                            to each desired location are assigned a color based on the collected data.
+                        </p>
                         <!-- <a class="btn btn-light btn-xl" href="#services">Get Started!</a> -->
                     </div>
                 </div>
@@ -88,7 +91,24 @@
                     <div class="col-lg-8 text-center">
                         <h2 class="text-black mt-0">Introduction</h2>
                         <hr class="divider divider-dark" /> 
-                        <p class="text-black-75 mb-4">Start Bootstrap has everything you need to get your new website up and running in no time! Choose one of our open source, free to download, and easy to use themes! No strings attached!</p>
+                        <p class="text-black-75 mb-4">The components of this project include a Raspberry Pi, piTFT screen, and a 32x32 LED Matrix.
+                            An interactive weather map will be created to display real time weather data. The numerical data for temperature and 
+                            humidity, as well as the local weather data for temperature and precipitation will be displayed on the piTFT. In addition, 
+                            specific LEDs on a 32x32 LED Matrix will be assigned to 17 different locations in New York State. Each LED will be assigned 
+                            a color that will correspond with the temperature and humidity. When the system is powered on there is a start screen followed
+                            by four different user options. These options include:
+                        </p>
+                        <ul>
+                          <li>Relative Temperature: Displays temperature data for all of the selected locations on the piTFT along with a scale legend. 
+                              Assigns LED colors based on the highest and lowest temperature values in New York State.</li>
+                          <li>Relative Humidity: Displays humidity data for all of the selected locations on the piTFT along with a scale legend. 
+                              Assigns LED colors based on the highest and lowest humidity values in New York State.</li>
+                          <li>Cities and Towns: Displays list of all selected cities and towns. When a location is chosen, the LED corresponding to the 
+                              location turns on and the temperature and precipitation data for the selected location is displayed on the piTFT along 
+                              with a weather icon.</li>
+                          <li>Temperature: Displays temperature data for all of the selected locations on the piTFT along with a predefined scale legend. 
+                              Assigns LED colors based on the set scale for temperature values (0 degrees F to 100 degrees F).</li>
+                        </ul>
                         <!-- <a class="btn btn-light btn-xl" href="#services">Get Started!</a> -->
                     </div>
                 </div>
@@ -160,7 +180,7 @@
             </div>
         </section>
         <!-- Team-->
-        <section class="page-section" id="team">
+        <section class="page-section" id="">
             <div class="container px-4 px-lg-5">
                 <div class="row gx-4 gx-lg-5 justify-content-center">
                     <div class="col-lg-8 text-center">
