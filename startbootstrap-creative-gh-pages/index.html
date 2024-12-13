@@ -256,9 +256,11 @@
                         </table>
                         </div>
                          <div class="col-lg-8 text-left">
+                          <br>
                          <p>The hardware was tested by using a python code from Adafruit found here: 
                              https://learn.adafruit.com/connecting-a-16x32-rgb-led-matrix-panel-to-a-raspberry-pi/experimental-python-code. 
-                             The example code is attached at the end of the report called</p> <b>testLED.py</b>
+                             The example code is attached at the end of the report called testLED.py
+                         </p>
                         <p>When testing the code we saw several LEDs light up in colors red, white, and green. The code was written for a 16x32 LED
                                 matrix, which resulted some of the LEDs not turning on during the initial test. We changed the code to be correctly sized 
                                 for a 32x32 LED matrix by changing the range and adding a d_pin to 'set_row()' in the code. 
@@ -280,18 +282,20 @@
                             of the report. Throughout our progress on this project we made several updates to how we implemented the API call. Initially we 
                             used the latitude and longitude coordinates for the API call for the starting locations, such as in the below line of code. 
                         </p>
-                        <i>response = requests.get(f"https://api.openweathermap.org/data/2.5/weather?lat={42.1435257}&lon={-77.0543408}&appid={api_key}",verify=False)    
-                        </i>i
-                        <p>This approach was time consuming, as we needed to find the correct latitude and longitude numbers for each location we wanted to map. 
+                        <i>response = requests.get(f"https://api.openweathermap.org/data/2.5/weather?lat={42.1435257}&lon={-77.0543408}&appid={api_key}",verify=False)</i>
+                        <br> 
+                         <p>This approach was time consuming, as we needed to find the correct latitude and longitude numbers for each location we wanted to map. 
                             Another approach to collecting weather data was used. Instead of inputting the latitude and longitude, we inputted the name of the 
                             location we wanted to get data for, such as in the below line of code.
                         </p>
                         <i>responseAlbany = requests.get(f"https://api.openweathermap.org/data/2.5/weather?q=Albany&limit=1&appid={api_key}",verify=False)</i>
+                        <br>
                         <p>After getting a response, the staus code needs to be checked to confirm that data was collected. A staus code of 200 means that the data 
                             is collected. A status code of 403 means that data collection from Open Weather Map is down or data can not be collected at the time. 
                             An example of the data output from the API call for Albany, NY is below.
                         </p>
                         <i>{'coord': {'lon': -73.9662, 'lat': 42.6001}, 'weather': [{'id': 802, 'main': 'Clouds', 'description': 'scattered clouds', 'icon': '03d'}], 'base': 'stations', 'main': {'temp': 272.81, 'feels_like': 270.58, 'temp_min': 271.36, 'temp_max': 274.05, 'pressure': 1019, 'humidity': 50, 'sea_level': 1019, 'grnd_level': 990}, 'visibility': 10000, 'wind': {'speed': 1.79, 'deg': 228, 'gust': 7.6}, 'clouds': {'all': 49}, 'dt': 1734029447, 'sys': {'type': 2, 'id': 19530, 'country': 'US', 'sunrise': 1734005826, 'sunset': 1734038566}, 'timezone': -18000, 'id': 5106841, 'name': 'Albany', 'cod': 200}</i>
+                        <br>
                         <p>The temperature, humidity, and precipitation data for the weather map was pulled from this response output. During our initial testing we 
                             noticed that the API would work well sometimes, but not work at other times. Initially, it was thought that on some occasions we would either 
                             call the API at the correct time when giving a signal or we would miss the signal. We added a while loop to run the API call and wait for 
@@ -323,6 +327,7 @@
                         <li>Rochester</li>
                         <li>Syracuse</li>
                         <li>Watertown</li>
+                        <br>
                         <p>During the process of choosing an LED, initially a small section of LEDs were turned on around each location. Slowly the area of LEDs that were
                             on was decreased and was narrowed down to one LED for each location.
                         </p>
@@ -330,7 +335,10 @@
                             using an LED matrix. To solve this issue we created a for loop that turns off all of the LEDs. After the for loop, the LEDs used for each location 
                             are turned on. This sequence runs each time the LEDs are refreshed. 
                         </p>
+                         
                         <b>Main Code Setup and Integrate Data Collection</b>
+                        <p>After having the API and LEDs working independly, we moved on to writing the main code used for the system. The first part of the code</p>
+                         
                         <b>Relative Temperature</b>
                         <b>Relative Humidity</b>
                         <b>Temperature</b>
