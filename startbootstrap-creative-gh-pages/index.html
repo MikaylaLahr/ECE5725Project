@@ -152,6 +152,7 @@
                         <li>Sunrise/Sunset</li>
                         <li>Real Time Data</li>
                         <li>Future Data</li>
+                         <br>
                         <p>We wanted to implement multiple types of data collection that we could switch between to make sure that the LEDs were updating 
                             the new data and color correctly. We used Open Weather Map to collect the weather data using an API key. The free plan did not 
                             include access to future predicted data and we could only use real time data. We decided to collect temperature, humidity, and 
@@ -257,8 +258,7 @@
                         </div>
                          <div class="col-lg-8 text-left">
                           <br>
-                         <p>The hardware was tested by using a python code from Adafruit found here: 
-                             https://learn.adafruit.com/connecting-a-16x32-rgb-led-matrix-panel-to-a-raspberry-pi/experimental-python-code. 
+                         <p>The hardware was tested by using a python code from Adafruit found <a href="https://learn.adafruit.com/connecting-a-16x32-rgb-led-matrix-panel-to-a-raspberry-pi/experimental-python-code">here.</a>
                              The example code is attached at the end of the report called testLED.py
                          </p>
                         <p>When testing the code we saw several LEDs light up in colors red, white, and green. The code was written for a 16x32 LED
@@ -283,19 +283,22 @@
                             used the latitude and longitude coordinates for the API call for the starting locations, such as in the below line of code. 
                         </p>
                         <i>response = requests.get(f"https://api.openweathermap.org/data/2.5/weather?lat={42.1435257}&lon={-77.0543408}&appid={api_key}",verify=False)</i>
-                        <br> 
+                        <p>  </p>
+                         <br> 
                          <p>This approach was time consuming, as we needed to find the correct latitude and longitude numbers for each location we wanted to map. 
                             Another approach to collecting weather data was used. Instead of inputting the latitude and longitude, we inputted the name of the 
                             location we wanted to get data for, such as in the below line of code.
                         </p>
                         <i>responseAlbany = requests.get(f"https://api.openweathermap.org/data/2.5/weather?q=Albany&limit=1&appid={api_key}",verify=False)</i>
-                        <br>
+                        <p>  </p>
+                         <br>
                         <p>After getting a response, the staus code needs to be checked to confirm that data was collected. A staus code of 200 means that the data 
                             is collected. A status code of 403 means that data collection from Open Weather Map is down or data can not be collected at the time. 
                             An example of the data output from the API call for Albany, NY is below.
                         </p>
                         <i>{'coord': {'lon': -73.9662, 'lat': 42.6001}, 'weather': [{'id': 802, 'main': 'Clouds', 'description': 'scattered clouds', 'icon': '03d'}], 'base': 'stations', 'main': {'temp': 272.81, 'feels_like': 270.58, 'temp_min': 271.36, 'temp_max': 274.05, 'pressure': 1019, 'humidity': 50, 'sea_level': 1019, 'grnd_level': 990}, 'visibility': 10000, 'wind': {'speed': 1.79, 'deg': 228, 'gust': 7.6}, 'clouds': {'all': 49}, 'dt': 1734029447, 'sys': {'type': 2, 'id': 19530, 'country': 'US', 'sunrise': 1734005826, 'sunset': 1734038566}, 'timezone': -18000, 'id': 5106841, 'name': 'Albany', 'cod': 200}</i>
-                        <br>
+                        <p>  </p>
+                         <br>
                         <p>The temperature, humidity, and precipitation data for the weather map was pulled from this response output. During our initial testing we 
                             noticed that the API would work well sometimes, but not work at other times. Initially, it was thought that on some occasions we would either 
                             call the API at the correct time when giving a signal or we would miss the signal. We added a while loop to run the API call and wait for 
