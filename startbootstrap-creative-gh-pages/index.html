@@ -329,22 +329,68 @@
                         <li>Watertown</li>
                         <br>
                         <p>During the process of choosing an LED, initially a small section of LEDs were turned on around each location. Slowly the area of LEDs that were
-                            on was decreased and was narrowed down to one LED for each location.
+                            on was decreased and was narrowed down to one LED for each location. 
                         </p>
                         <p>When testing, we noticed some issues with the LEDs flickering. We read other reports for teams that used the LED matrix and talked with other groups
                             using an LED matrix. To solve this issue we created a for loop that turns off all of the LEDs. After the for loop, the LEDs used for each location 
-                            are turned on. This sequence runs each time the LEDs are refreshed. 
+                            are turned on. This sequence runs each time the LEDs are refreshed. This solution is implemented in the main code screen_with_LED.py
                         </p>
                          
                         <b>Main Code Setup and Integrate Data Collection</b>
-                        <p>After having the API and LEDs working independly, we moved on to writing the main code used for the system. The first part of the code</p>
+                        <p>After having the API and LEDs working indepently, we moved on to writing the main code used for the system. The first part of the code sets up the 
+                         start button titled "Weather Map". The start menu can be seen in the below figure. </p>
+                         <p>After pressing on the start button, there is a menu of four options for the user: relative temperature, relative 
+                         humidity, cities and towns, and temperature. Any of these options can be selected as seen in the below figure. 
+                        </p>
+                         <p>The subsections of the code are outlined in the remaining sections of the report. Each subsection has a back button to return to the menu options.
+                          In addition to the previously mentioned features, there is a 
+                          physical quit button on the piTFT using GPIO 27. Weather data is collected using the API key at the start of the code before entering any of the 
+                          subsections. There is also a timer implemented in the code that calls a function to get new data after ten minutes to keep all of the displayed 
+                          data updated. 
+                         </p>
                          
                         <b>Relative Temperature</b>
+                        <p>The subsection for Relative Temperature displays temperature data across New York State. The temperature is in Farenheight and the data for each location is 
+                         displayed on the piTFT screen. In addition, there is a legend on the bottom of the screen that indicates what LED colors are used for each temperature range.
+                         Five LED colors are used including white (lowest range), light blue, blue, yellow, and red (highest range). The ranges and LED colors corresponding to each location
+                         are assigned in function "LED_Temp_Color". In the function, the temperature for all locations is placed into an array and the maximum and minimum temperature values are 
+                         are found. The difference between the maximum and minimum temperatures is calculated and then divided by 5. Each range is found by adding the calculated value
+                         to the previous range. Range 1 is the minimum temperature value added to the calculated value. A series of if else statements checks the temperature in each location 
+                         and assigns a color to each location based on the temperature and range values.
+                        </p>
+                         
                         <b>Relative Humidity</b>
+                        <p>The subsection for Relative Humidity displays humidity data across New York State. The humidity is in units of percent relative humidity and the data for each location is 
+                         displayed on the piTFT screen. In addition, there is a legend on the bottom of the screen that indicates what LED colors are used for each humidity range.
+                         Three LED colors are used including white (lowest range), yellow, and red (highest range). The ranges and LED colors corresponding to each location
+                         are assigned in function "LED_Humid_Color". In the function, the humidity for all locations is placed into an array and the maximum and minimum humidity values are 
+                         are found. The difference between the maximum and minimum humidity is calculated and then divided by 3. Each range is found by adding the calculated value
+                         to the previous range. Range 1 is the minimum humidity value added to the calculated value. A series of if else statements checks the humidity in each location 
+                         and assigns a color to each location based on the humidity and range values.
+                        </p>
+                         
                         <b>Temperature</b>
+                        <p>The subsection for Temperature displays temperature data across New York State. The temperature is in Farenheight and the data for each location is 
+                         displayed on the piTFT screen. In addition, there is a legend on the bottom of the screen that indicates what LED colors are used for each temperature range.
+                         Five LED colors are used including white (lowest range), light blue, blue, yellow, and red (highest range). The ranges and LED colors corresponding to each location
+                         are assigned in function "LED_realTemp_Color". In the function, the ranges are predefined and extend from less than 15 to 32 to 50 to over 75 degrees Farenheight
+                         A series of if else statements checks the temperature in each location and assigns a color to each location based on the temperature and range values.
+                        </p>
+                         
                         <b>Cities and Towns</b>
+                         <p></p>
+
+                         <b>Testing Issues</b>
+                         <p>Other than the previously mentioned issues that were worked through involving the API data collection and the flickering LEDs, we also experienced issues with
+                         using the touchscreen of the piTFT. Each time we turned on the Raspberry-Pi, the touch screen would have to be set up. 
+                         </p>
+
+                         <b>Other Considerations</b>
+                         <p>We considered adding data about relative wind speed and relative cloud coverage to the user menu options. The data collection for this was set up but not implemented in the 
+                          main code. Instead of these options, we instead implemented Temperature with fixed ranges for the incoming data and display. 
+                         </p>
                         </div>
-                        <!-- <a class="btn btn-light btn-xl" href="#services">Get Started!</a> -->
+                        
                         </div>
                     </div>
                 </div>
@@ -357,8 +403,10 @@
                     <div class="col-lg-8 text-center">
                         <h2 class="text-black mt-0">Results</h2>
                         <hr class="divider divider-dark" /> 
+                     <div class="col-lg-8 text-left">
                         <p class="text-black-75 mb-4">Start Bootstrap has everything you need to get your new website up and running in no time! Choose one of our open source, free to download, and easy to use themes! No strings attached!</p>
                         <!-- <a class="btn btn-light btn-xl" href="#services">Get Started!</a> -->
+                     </div>
                     </div>
                 </div>
             </div>
@@ -370,6 +418,7 @@
                     <div class="col-lg-8 text-center">
                         <h2 class="text-black mt-0">Conclusions</h2>
                         <hr class="divider divider-dark" /> 
+                     <div class="col-lg-8 text-left">
                         <p class="text-black-75 mb-4">
                             This project successfully integrates hardware and software to create an interactive, real-time weather visualization system for 17 locations across New York State. By combining a Raspberry Pi, a piTFT touchscreen, and a 32x32 LED matrix, the system provides a unique and visually engaging way to explore live weather data. The system includes multiple features, such as the ability to display relative temperature and humidity values, as well as city-specific weather details like temperature, precipitation, and weather icons. The dynamic LED matrix enhances the user experience by visually representing data with color-coded LEDs corresponding to each location.
                         </p>
@@ -380,6 +429,7 @@
                             This project demonstrates the potential of combining embedded systems with real-time data APIs to create practical and engaging solutions. Future work could involve expanding the system to include weather forecasts, more locations, or additional data points such as wind speed or air quality. These enhancements would further increase the utility and scope of the system, making it a versatile tool for broader applications. Overall, this project provides a strong foundation for creating interactive and educational tools that make real-time data accessible and visually appealing.
                         </p>
                         <!-- <a class="btn btn-light btn-xl" href="#services">Get Started!</a> -->
+                     </div>
                     </div>
                 </div>
             </div>
@@ -391,6 +441,7 @@
                     <div class="col-lg-8 text-center">
                         <h2 class="text-black mt-0">Future Work</h2>
                         <hr class="divider divider-dark" /> 
+                     <div class="col-lg-8 text-left">
                         <p class="text-black-75 mb-4">
                             While the project successfully visualizes real-time weather data for New York State, several enhancements could further improve its functionality and expand its applications. One potential area of development is the inclusion of weather forecast data, which would allow users to view not only current conditions but also predicted weather trends for the next few days.
                         </p>
@@ -401,6 +452,7 @@
                             Lastly, transitioning to a cloud-based API management system could improve scalability and reduce latency, especially when accessing large datasets or supporting multiple users. These enhancements would build on the current project’s strong foundation, increasing its usability and appeal for broader audiences, including educational institutions and public installations.
                         </p>
                         <!-- <a class="btn btn-light btn-xl" href="#services">Get Started!</a> -->
+                     </div>
                     </div>
                 </div>
             </div>
@@ -427,6 +479,21 @@
                         <hr class="divider divider-dark" /> 
                         <p class="text-black-75 mb-4">Start Bootstrap has everything you need to get your new website up and running in no time! Choose one of our open source, free to download, and easy to use themes! No strings attached!</p>
                         <!-- <a class="btn btn-light btn-xl" href="#services">Get Started!</a> -->
+                    </div>
+                </div>
+            </div>
+        </section>
+     <!-- References-->
+        <section class="page-section" id="">
+            <div class="container px-4 px-lg-5">
+                <div class="row gx-4 gx-lg-5 justify-content-center">
+                    <div class="col-lg-8 text-center">
+                        <h2 class="text-black mt-0">References</h2>
+                        <hr class="divider divider-dark" /> 
+                     <div class="col-lg-8 text-left">
+                        <p class="text-black-75 mb-4">Start Bootstrap has everything you need to get your new website up and running in no time! Choose one of our open source, free to download, and easy to use themes! No strings attached!</p>
+                        <!-- <a class="btn btn-light btn-xl" href="#services">Get Started!</a> -->
+                     </div>
                     </div>
                 </div>
             </div>
