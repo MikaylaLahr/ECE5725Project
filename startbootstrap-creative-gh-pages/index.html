@@ -342,20 +342,22 @@
                         <b>Main Code Setup and Integrate Data Collection</b>
                         <p>After having the API and LEDs working indepently, we moved on to writing the main code used for the system. The first part of the code sets up the 
                          start button titled "Weather Map". The start menu can be seen in the below figure. </p>
-                         <div class="col-lg-8 text-center">
+                        </div>
                          <div class="col-lg-8 text-center">
                             <p>Figure 2: Start Screen and Button, MAP has no LEDs turned on</p>
                             <img width="350" height="auto" src="assets/img/startbutton.png"></img>
                          </div>
-                         </div>
-                         <p>After pressing on the start button, there is a menu of four options for the user: relative temperature, relative 
+                         <div class="col-lg-8 text-left">
+                        <p class="text-black-75 mb-4">After pressing on the start button, there is a menu of four options for the user: relative temperature, relative 
                          humidity, cities and towns, and temperature. Any of these options can be selected as seen in the below figure. 
                         </p>
+                         </div>
                          <div class="col-lg-8 text-center">
                             <p>Figure 3: System Menu Options</p>
                             <img width="350" height="auto" src="assets/img/usermenu.png"></img>
                         </div>
-                         <p>The subsections of the code are outlined in the remaining sections of the report. Each subsection has a back button to return to the menu options.
+                 <div class="col-lg-8 text-left">
+                        <p class="text-black-75 mb-4">The subsections of the code are outlined in the remaining sections of the report. Each subsection has a back button to return to the menu options.
                           In addition to the previously mentioned features, there is a 
                           physical quit button on the piTFT using GPIO 27. Weather data is collected using the API key at the start of the code before entering any of the 
                           subsections. There is also a timer implemented in the code that calls a function to get new data after ten minutes to keep all of the displayed 
@@ -371,12 +373,16 @@
                          to the previous range. Range 1 is the minimum temperature value added to the calculated value. A series of if else statements checks the temperature in each location 
                          and assigns a color to each location based on the temperature and range values.
                         </p>
+                 </div>
                          <div class="col-lg-8 text-center">
                             <p>Figure 4: Relative Temperature Screen</p>
+                          <img width="350" height="auto" src="assets/img/relTempScreen.png"></img>
 
                             <p>Figure 5: Relative Temperature Map</p>
+                          <img width="350" height="auto" src="assets/img/relTemp.png"></img>
                         </div>
-                         
+                     <div class="col-lg-8 text-left">
+                        <p class="text-black-75 mb-4"> </p>
                         <b>Relative Humidity</b>
                         <p>The subsection for Relative Humidity displays humidity data across New York State. The humidity is in units of percent relative humidity and the data for each location is 
                          displayed on the piTFT screen. In addition, there is a legend on the bottom of the screen that indicates what LED colors are used for each humidity range.
@@ -386,12 +392,16 @@
                          to the previous range. Range 1 is the minimum humidity value added to the calculated value. A series of if else statements checks the humidity in each location 
                          and assigns a color to each location based on the humidity and range values.
                         </p>
+                     </div>
                           <div class="col-lg-8 text-center">
                             <p>Figure 6: Relative Humidity Screen</p>
+                           <img width="350" height="auto" src="assets/img/relHumScreen.png"></img>
 
                             <p>Figure 7: Relative Humidity Map</p>
+                           <img width="350" height="auto" src="assets/img/relHum.png"></img>
                         </div>
-                         
+                      <div class="col-lg-8 text-left">
+                        <p class="text-black-75 mb-4"> </p>
                         <b>Temperature</b>
                         <p>The subsection for Temperature displays temperature data across New York State. The temperature is in Farenheight and the data for each location is 
                          displayed on the piTFT screen. In addition, there is a legend on the bottom of the screen that indicates what LED colors are used for each temperature range.
@@ -399,23 +409,34 @@
                          are assigned in function "LED_realTemp_Color". In the function, the ranges are predefined and extend from less than 15 to 32 to 50 to over 75 degrees Farenheight
                          A series of if else statements checks the temperature in each location and assigns a color to each location based on the temperature and range values.
                         </p>
+                      </div>
                           <div class="col-lg-8 text-center">
                             <p>Figure 8: Temperature Screen</p>
+                           <img width="350" height="auto" src="assets/img/TempScreen.png"></img>
 
                             <p>Figure 9: Temperature Map</p>
+                           <img width="350" height="auto" src="assets/img/Temp.png"></img>
                         </div>
-                         
+                     <div class="col-lg-8 text-left">
+                        <p class="text-black-75 mb-4"> </p>
                         <b>Cities and Towns</b>
                          <p></p>
+                     </div>
                           <div class="col-lg-8 text-center">
                             <p>Figure 10: Cities and Towns Menu Options</p>
+                           <img width="350" height="auto" src="assets/img/citymenu.png"></img>
 
                             <p>Figure 11: Cities and Towns Screen</p>
+                           <img width="350" height="auto" src="assets/img/cityscreen.png"></img>
 
                             <p>Figure 12: Cities and Towns Map, First Press</p>
+                           <img width="350" height="auto" src="assets/img/cityMap1.png"></img>
 
                             <p>Figure 13: Cities and Towns Map, Second Press</p>
+                           <img width="350" height="auto" src="assets/img/cityMap2.png"></img>
                         </div>
+                 <div class="col-lg-8 text-left">
+                        <p class="text-black-75 mb-4">  </p>
 
                          <b>Testing Issues</b>
                          <p>Other than the previously mentioned issues that were worked through involving the API data collection and the flickering LEDs, we also experienced issues with
