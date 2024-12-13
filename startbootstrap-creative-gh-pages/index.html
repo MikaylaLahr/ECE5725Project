@@ -480,15 +480,33 @@
                 <div class="row gx-4 gx-lg-5 justify-content-center">
                     <div class="col-lg-8 text-center">
                         <h2 class="text-black mt-0">Results</h2>
-                        <hr class="divider divider-dark" /> 
+                        <hr class="divider divider-dark" />
                     </div>
-                     <div class="col-lg-8 text-left">
-                        <p class="text-black-75 mb-4">Start Bootstrap has everything you need to get your new website up and running in no time! Choose one of our open source, free to download, and easy to use themes! No strings attached!</p>
+                    <div class="col-lg-8 text-left">
+                        <p class="text-black-75 mb-4">
+                            The interactive weather map successfully visualizes real-time weather data for 17 locations across New York State using a Raspberry Pi, piTFT touchscreen, and a 32x32 LED matrix. Each mode and feature implemented during the design and testing phases worked as intended, producing the following outcomes:
+                        </p>
+                        <p class="text-black-75 mb-4">
+                            The piTFT screen effectively displayed real-time weather data, including temperature, humidity, and precipitation for all selected locations. City-specific details were shown with a weather icon, providing an intuitive and user-friendly interface.
+                        </p>
+                        <p class="text-black-75 mb-4">
+                            The 32x32 LED matrix displayed accurate visual representations of weather data. LEDs lit up in location-specific colors, dynamically mapped to relative temperature and humidity ranges, or fixed temperature scales. The transition from design to implementation ensured smooth and accurate operation.
+                        </p>
+                        <p class="text-black-75 mb-4">
+                            Each functional subsection worked as designed. Relative Temperature and Humidity modes used color-coded legends to represent varying levels across locations, dynamically calculating ranges based on the highest and lowest values. Temperature mode used predefined scales for consistent visualization. The Cities and Towns mode allowed users to select a location, highlighting its corresponding LED while displaying detailed weather data on the piTFT.
+                        </p>
+                        <p class="text-black-75 mb-4">
+                            Real-time weather data collection was achieved through the integration of OpenWeatherMap's API. A fallback dataset allowed progress during testing without exceeding API call limits, minimizing downtime and enabling smooth development.
+                        </p>
+                        <p class="text-black-75 mb-4">
+                            The system's overall performance met the objectives, creating an interactive and engaging weather map. Future expansions, such as adding more locations, data types, or forecast features, could further enhance the system's functionality and user appeal.
+                        </p>
                         <!-- <a class="btn btn-light btn-xl" href="#services">Get Started!</a> -->
-                     </div>
+                    </div>
                 </div>
             </div>
         </section>
+
         <!-- Conclusions-->
         <section class="page-section" id="conclusions">
             <div class="container px-4 px-lg-5">
@@ -532,19 +550,85 @@
                 </div>
             </div>
         </section>
+        </section>
         <!-- Budget-->
-        <section class="page-section" id="">
+        <section class="page-section" id="budget">
             <div class="container px-4 px-lg-5">
                 <div class="row gx-4 gx-lg-5 justify-content-center">
                     <div class="col-lg-8 text-center">
                         <h2 class="text-black mt-0">Budgets</h2>
-                        <hr class="divider divider-dark" /> 
-                        <p class="text-black-75 mb-4">Start Bootstrap has everything you need to get your new website up and running in no time! Choose one of our open source, free to download, and easy to use themes! No strings attached!</p>
-                        <!-- <a class="btn btn-light btn-xl" href="#services">Get Started!</a> -->
+                        <hr class="divider divider-dark" />
+                        <p class="text-black-75 mb-4">
+                            The following table provides a breakdown of the costs associated with the project.
+                        </p>
+                    </div>
+                    <div class="col-lg-8 text-left">
+                        <table class="table table-bordered table-striped">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Quantity</th>
+                                    <th>Total Cost ($)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Raspberry Pi 4</td>
+                                    <td>1</td>
+                                    <td>35</td>
+                                </tr>
+                                <tr>
+                                    <td>16 GB microSD Card</td>
+                                    <td>1</td>
+                                    <td>8</td>
+                                </tr>
+                                <tr>
+                                    <td>15W USB-C Power Supply</td>
+                                    <td>1</td>
+                                    <td>8</td>
+                                </tr>
+                                <tr>
+                                    <td>Resistive Touch PiTFT - 320x240 2.8" TFT+Touchscreen</td>
+                                    <td>1</td>
+                                    <td>35</td>
+                                </tr>
+                                <tr>
+                                    <td>32x32 RGB LED Matrix Panel 6mm pitch</td>
+                                    <td>1</td>
+                                    <td>40</td>
+                                </tr>
+                                <tr>
+                                    <td>5V 2A DC Power Adapter</td>
+                                    <td>1</td>
+                                    <td>9</td>
+                                </tr>
+                                <tr>
+                                    <td>Pin to Socket Jumper Cable</td>
+                                    <td>16</td>
+                                    <td>2</td>
+                                </tr>
+                                <tr>
+                                    <th>TOTAL</th>
+                                    <td>--</td>
+                                    <td>137</td>
+                                </tr>
+                                <tr>
+                                    <td>ECE 5725 Basic Kit (Pi, PiTFT, SD Card, USB-C)</td>
+                                    <td>1</td>
+                                    <td>(86)</td>
+                                </tr>
+                                <tr>
+                                    <th>TOTAL EXCLUDING ECE 5725 BASIC KIT</th>
+                                    <td>--</td>
+                                    <td>51</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </section>
+
         <!-- Team-->
         <section class="page-section" id="">
             <div class="container px-4 px-lg-5">
