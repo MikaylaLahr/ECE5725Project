@@ -2576,15 +2576,1028 @@ code_running2 <span style="color: #333333">=</span> <span style="color: #007020"
 	<span style="color: #008800; font-weight: bold">del</span>(pitft)
 </pre></div>
 
+			<h3 class="text-black mt-0">API_with_LED.py</h3>
+<!-- HTML generated using hilite.me --><div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #DD4422">&#39;&#39;&#39;</span>
+<span style="color: #DD4422">Mikayla Lahr (mrl242) and Mahathi Andavolu (ma2339)</span>
+<span style="color: #DD4422">Final Project</span>
+<span style="color: #DD4422">December 10, 2024</span>
+
+<span style="color: #DD4422">Test the API key data with the LEDs</span>
+<span style="color: #DD4422">Also includes data collection for wind and clouds</span>
+
+<span style="color: #DD4422">&#39;&#39;&#39;</span>
+
+<span style="color: #008800; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">requests</span> 
+<span style="color: #008800; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">json</span>
+<span style="color: #008800; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">RPi.GPIO</span> <span style="color: #008800; font-weight: bold">as</span> <span style="color: #0e84b5; font-weight: bold">GPIO</span>
+<span style="color: #008800; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">time</span>
+<span style="color: #008800; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">numpy</span>
+
+<span style="color: #888888"># setup for LED matrix pins</span>
+delay <span style="color: #333333">=</span> <span style="color: #6600EE; font-weight: bold">0.000001</span>
+
+GPIO<span style="color: #333333">.</span>setmode(GPIO<span style="color: #333333">.</span>BCM)
+red1_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">25</span>
+green1_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">18</span>
+blue1_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">12</span>
+red2_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">23</span>
+green2_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">24</span>
+blue2_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">20</span>
+clock_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">6</span>
+a_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">21</span>
+b_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">16</span>
+c_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">26</span>
+d_pin  <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">17</span>
+latch_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">4</span>
+oe_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">22</span>
+
+GPIO<span style="color: #333333">.</span>setup(red1_pin, GPIO<span style="color: #333333">.</span>OUT)
+GPIO<span style="color: #333333">.</span>setup(green1_pin, GPIO<span style="color: #333333">.</span>OUT)
+GPIO<span style="color: #333333">.</span>setup(blue1_pin, GPIO<span style="color: #333333">.</span>OUT)
+GPIO<span style="color: #333333">.</span>setup(red2_pin, GPIO<span style="color: #333333">.</span>OUT)
+GPIO<span style="color: #333333">.</span>setup(green2_pin, GPIO<span style="color: #333333">.</span>OUT)
+GPIO<span style="color: #333333">.</span>setup(blue2_pin, GPIO<span style="color: #333333">.</span>OUT)
+GPIO<span style="color: #333333">.</span>setup(clock_pin, GPIO<span style="color: #333333">.</span>OUT)
+GPIO<span style="color: #333333">.</span>setup(a_pin, GPIO<span style="color: #333333">.</span>OUT)
+GPIO<span style="color: #333333">.</span>setup(b_pin, GPIO<span style="color: #333333">.</span>OUT)
+GPIO<span style="color: #333333">.</span>setup(c_pin, GPIO<span style="color: #333333">.</span>OUT)
+GPIO<span style="color: #333333">.</span>setup(d_pin, GPIO<span style="color: #333333">.</span>OUT)
+GPIO<span style="color: #333333">.</span>setup(latch_pin, GPIO<span style="color: #333333">.</span>OUT)
+GPIO<span style="color: #333333">.</span>setup(oe_pin, GPIO<span style="color: #333333">.</span>OUT)
+
+<span style="color: #888888"># functions for LEDs </span>
+screen <span style="color: #333333">=</span> [[<span style="color: #0000DD; font-weight: bold">0</span> <span style="color: #008800; font-weight: bold">for</span> x <span style="color: #000000; font-weight: bold">in</span> <span style="color: #007020">range</span>(<span style="color: #0000DD; font-weight: bold">32</span>)] <span style="color: #008800; font-weight: bold">for</span> x <span style="color: #000000; font-weight: bold">in</span> <span style="color: #007020">range</span>(<span style="color: #0000DD; font-weight: bold">32</span>)]
+
+<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">clock</span>():
+    GPIO<span style="color: #333333">.</span>output(clock_pin, <span style="color: #0000DD; font-weight: bold">1</span>)
+    GPIO<span style="color: #333333">.</span>output(clock_pin, <span style="color: #0000DD; font-weight: bold">0</span>)
+
+<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">latch</span>():
+    GPIO<span style="color: #333333">.</span>output(latch_pin, <span style="color: #0000DD; font-weight: bold">1</span>)
+    GPIO<span style="color: #333333">.</span>output(latch_pin, <span style="color: #0000DD; font-weight: bold">0</span>)
+
+<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">bits_from_int_row</span>(x):
+    a_bit <span style="color: #333333">=</span> x <span style="color: #333333">&amp;</span> <span style="color: #0000DD; font-weight: bold">1</span>
+    b_bit <span style="color: #333333">=</span> x <span style="color: #333333">&amp;</span> <span style="color: #0000DD; font-weight: bold">2</span>
+    c_bit <span style="color: #333333">=</span> x <span style="color: #333333">&amp;</span> <span style="color: #0000DD; font-weight: bold">4</span>
+    d_bit <span style="color: #333333">=</span> x <span style="color: #333333">&amp;</span> <span style="color: #0000DD; font-weight: bold">8</span>
+    <span style="color: #008800; font-weight: bold">return</span> (a_bit, b_bit, c_bit, d_bit)
+    
+<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">bits_from_int_color</span>(x):
+    red <span style="color: #333333">=</span> x <span style="color: #333333">&amp;</span> <span style="color: #0000DD; font-weight: bold">1</span>
+    green <span style="color: #333333">=</span> x <span style="color: #333333">&amp;</span> <span style="color: #0000DD; font-weight: bold">2</span>
+    blue <span style="color: #333333">=</span> x <span style="color: #333333">&amp;</span> <span style="color: #0000DD; font-weight: bold">4</span>
+    <span style="color: #008800; font-weight: bold">return</span> (red,green,blue)
+
+<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">set_row</span>(row):
+    <span style="color: #888888">#time.sleep(delay)</span>
+    a_bit, b_bit, c_bit, d_bit <span style="color: #333333">=</span> bits_from_int_row(row)
+    GPIO<span style="color: #333333">.</span>output(a_pin, a_bit)
+    GPIO<span style="color: #333333">.</span>output(b_pin, b_bit)
+    GPIO<span style="color: #333333">.</span>output(c_pin, c_bit)
+    GPIO<span style="color: #333333">.</span>output(d_pin, d_bit)
+    <span style="color: #888888">#time.sleep(delay)</span>
+
+<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">set_color_top</span>(color):
+    <span style="color: #888888">#time.sleep(delay)</span>
+    red, green, blue <span style="color: #333333">=</span> bits_from_int_color(color)
+    GPIO<span style="color: #333333">.</span>output(red1_pin, red)
+    GPIO<span style="color: #333333">.</span>output(green1_pin, green)
+    GPIO<span style="color: #333333">.</span>output(blue1_pin, blue)
+    <span style="color: #888888">#time.sleep(delay)</span>
+
+<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">set_color_bottom</span>(color):
+    <span style="color: #888888">#time.sleep(delay)</span>
+    red, green, blue <span style="color: #333333">=</span> bits_from_int_color(color)
+    GPIO<span style="color: #333333">.</span>output(red2_pin, red)
+    GPIO<span style="color: #333333">.</span>output(green2_pin, green)
+    GPIO<span style="color: #333333">.</span>output(blue2_pin, blue)
+    <span style="color: #888888">#time.sleep(delay)</span>
+
+<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">refresh</span>():
+    <span style="color: #008800; font-weight: bold">for</span> row <span style="color: #000000; font-weight: bold">in</span> <span style="color: #007020">range</span>(<span style="color: #0000DD; font-weight: bold">16</span>):
+        GPIO<span style="color: #333333">.</span>output(oe_pin, <span style="color: #0000DD; font-weight: bold">1</span>)
+        set_color_top(<span style="color: #0000DD; font-weight: bold">0</span>)
+        set_row(row)
+        <span style="color: #888888">#time.sleep(delay)</span>
+        <span style="color: #008800; font-weight: bold">for</span> col <span style="color: #000000; font-weight: bold">in</span> <span style="color: #007020">range</span>(<span style="color: #0000DD; font-weight: bold">32</span>):
+            set_color_top(screen[row][col])
+            set_color_bottom(screen[row<span style="color: #333333">+</span><span style="color: #0000DD; font-weight: bold">16</span>][col])
+            clock()
+        <span style="color: #888888">#GPIO.output(oe_pin, 0)</span>
+        latch()
+        GPIO<span style="color: #333333">.</span>output(oe_pin, <span style="color: #0000DD; font-weight: bold">0</span>)
+        time<span style="color: #333333">.</span>sleep(delay)
+
+<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">fill_rectangle</span>(x1, y1, x2, y2, color):
+    <span style="color: #008800; font-weight: bold">for</span> x <span style="color: #000000; font-weight: bold">in</span> <span style="color: #007020">range</span>(x1, x2):
+        <span style="color: #008800; font-weight: bold">for</span> y <span style="color: #000000; font-weight: bold">in</span> <span style="color: #007020">range</span>(y1, y2):
+            screen[y][x] <span style="color: #333333">=</span> color
+
+
+<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">set_pixel</span>(x, y, color):
+    screen[y][x] <span style="color: #333333">=</span> color
+
+<span style="color: #888888"># function to collecte either test (0) or real API (1) data  </span>
+run <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">0</span>
+<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">Data_Update</span>():
+    <span style="color: #008800; font-weight: bold">if</span> run <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">0</span>:
+	    tempAlbany<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">0</span>; humAlbany<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">160</span>; windAlbany<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">0</span>; cloudAlbany<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">160</span>;
+	    tempBinghamton<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">10</span>; humBinghamton<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">150</span>; windBinghamton<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">10</span>; cloudBinghamton<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">150</span>;
+	    tempBuffalo<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">20</span>; humBuffalo<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">140</span>; windBuffalo<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">20</span>; cloudBuffalo<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">140</span>;
+	    tempCorning<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">30</span>; humCorning<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">130</span>; windCorning<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">30</span>; cloudCorning<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">130</span>;
+	    tempGlensFalls<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">40</span>; humGlensFalls<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">120</span>; windGlensFalls<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">40</span>; cloudGlensFalls<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">120</span>;
+	    tempIthaca<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">50</span>; humIthaca<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">110</span>; windIthaca<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">50</span>; cloudIthaca<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">110</span>;
+	    tempJamestown<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">60</span>; humJamestown<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">100</span>; windJamestown<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">60</span>; cloudJamestown<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">100</span>;
+	    tempLakePlacid<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">70</span>; humLakePlacid<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">90</span>; windLakePlacid<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">70</span>; cloudLakePlacid<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">90</span>;
+	    tempLongIsland<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">80</span>; humLongIsland<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">80</span>; windLongIsland<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">80</span>; cloudLongIsland<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">80</span>;
+	    tempMassena<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">90</span>; humMassena<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">70</span>; windMassena<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">90</span>; cloudMassena<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">70</span>;
+	    tempNewYorkCity<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">100</span>; humNewYorkCity<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">60</span>; windNewYorkCity<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">100</span>; cloudNewYorkCity<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">60</span>;
+	    tempNiagaraFalls<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">110</span>; humNiagaraFalls<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">50</span>; windNiagaraFalls<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">110</span>; cloudNiagaraFalls<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">50</span>;
+	    tempPlattsburgh<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">120</span>; humPlattsburgh<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">40</span>; windPlattsburgh<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">120</span>; cloudPlattsburgh<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">40</span>;
+	    tempPoughkeepsie<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">130</span>; humPoughkeepsie<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">30</span>; windPoughkeepsie<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">130</span>; cloudPoughkeepsie<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">30</span>;
+	    tempRochester<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">140</span>; humRochester<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">20</span>; windRochester<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">140</span>; cloudRochester<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">20</span>;
+	    tempSyracuse<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">150</span>; humSyracuse<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">10</span>; windSyracuse<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">150</span>; cloudSyracuse<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">10</span>;
+	    tempWatertown<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">160</span>; humWatertown<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">0</span>; windWatertown<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">160</span>; cloudWatertown<span style="color: #333333">=</span><span style="color: #0000DD; font-weight: bold">0</span>;
+    <span style="color: #008800; font-weight: bold">else</span>:
+	code_running <span style="color: #333333">=</span> <span style="color: #007020">True</span>
+	<span style="color: #008800; font-weight: bold">while</span> code_running:
+		api_key <span style="color: #333333">=</span> <span style="background-color: #fff0f0">&quot;35be87b0b778052cced6dbaee988b31b&quot;</span>
+		responseAlbany <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Albany&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+		responseBinghamton <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Binghamton&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+		responseBuffalo <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Buffalo&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+		responseCorning <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Corning&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+		responseGlensFalls <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Glens Falls&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+		responseIthaca <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Ithaca&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+		responseJamestown <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Jamestown&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+		responseLakePlacid <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Lake Placid&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+		responseLongIsland <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Long Island&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+		responseMassena <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Massena&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+		responseNewYorkCity <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=New York City&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+		responseNiagaraFalls <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Niagara Falls&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+		responsePlattsburgh <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Plattsburgh&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+		responsePoughkeepsie <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Poughkeepsie&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)	
+		responseRochester <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Rochester&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+		responseSyracuse <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Syracuse&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+		responseWatertown <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Watertown&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+		responseDelhi <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Delhi&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+		
+		rAlbany <span style="color: #333333">=</span> responseAlbany<span style="color: #333333">.</span>status_code
+		rBinghamton <span style="color: #333333">=</span> responseBinghamton<span style="color: #333333">.</span>status_code
+		rBuffalo <span style="color: #333333">=</span> responseBuffalo<span style="color: #333333">.</span>status_code
+		rCorning <span style="color: #333333">=</span> responseCorning<span style="color: #333333">.</span>status_code
+		rGlensFalls <span style="color: #333333">=</span> responseGlensFalls<span style="color: #333333">.</span>status_code
+		rIthaca <span style="color: #333333">=</span> responseIthaca<span style="color: #333333">.</span>status_code
+		rJamestown <span style="color: #333333">=</span> responseJamestown<span style="color: #333333">.</span>status_code
+		rLakePlacid <span style="color: #333333">=</span> responseLakePlacid<span style="color: #333333">.</span>status_code
+		rLongIsland <span style="color: #333333">=</span> responseLongIsland<span style="color: #333333">.</span>status_code
+		rMassena <span style="color: #333333">=</span> responseMassena<span style="color: #333333">.</span>status_code
+		rNewYorkCity <span style="color: #333333">=</span> responseNewYorkCity<span style="color: #333333">.</span>status_code
+		rNiagaraFalls <span style="color: #333333">=</span> responseNiagaraFalls<span style="color: #333333">.</span>status_code
+		rPlattsburgh <span style="color: #333333">=</span> responsePlattsburgh<span style="color: #333333">.</span>status_code
+		rPoughkeepsie <span style="color: #333333">=</span> responsePoughkeepsie<span style="color: #333333">.</span>status_code
+		rRochester <span style="color: #333333">=</span> responseRochester<span style="color: #333333">.</span>status_code
+		rSyracuse <span style="color: #333333">=</span> responseSyracuse<span style="color: #333333">.</span>status_code
+		rWatertown <span style="color: #333333">=</span> responseWatertown<span style="color: #333333">.</span>status_code
+		rDelhi <span style="color: #333333">=</span> responseDelhi<span style="color: #333333">.</span>status_code
+
+		<span style="color: #008800; font-weight: bold">print</span>(rAlbany); <span style="color: #008800; font-weight: bold">print</span>(rBinghamton); <span style="color: #008800; font-weight: bold">print</span>(rBuffalo); <span style="color: #008800; font-weight: bold">print</span>(rCorning); <span style="color: #008800; font-weight: bold">print</span>(rIthaca); <span style="color: #008800; font-weight: bold">print</span>(rJamestown); <span style="color: #008800; font-weight: bold">print</span>(rLakePlacid); <span style="color: #008800; font-weight: bold">print</span>(rLongIsland); <span style="color: #008800; font-weight: bold">print</span>(rMassena); <span style="color: #008800; font-weight: bold">print</span>(rNewYorkCity); <span style="color: #008800; font-weight: bold">print</span>(rNiagaraFalls); <span style="color: #008800; font-weight: bold">print</span>(rPlattsburgh); <span style="color: #008800; font-weight: bold">print</span>(rPoughkeepsie); <span style="color: #008800; font-weight: bold">print</span>(rRochester); <span style="color: #008800; font-weight: bold">print</span>(rSyracuse); <span style="color: #008800; font-weight: bold">print</span>(rWatertown); <span style="color: #008800; font-weight: bold">print</span>(rDelhi)
+		
+		<span style="color: #008800; font-weight: bold">if</span> rAlbany <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rBinghamton <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rBuffalo <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rCorning <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rGlensFalls <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rIthaca <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rJamestown <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rLakePlacid <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rLongIsland <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rMassena <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rNewYorkCity <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rNiagaraFalls <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rPlattsburgh <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rPoughkeepsie <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rRochester <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rSyracuse <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rWatertown <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span>:
+			code_running <span style="color: #333333">=</span> <span style="color: #007020">False</span>
+			
+			yAlbany <span style="color: #333333">=</span> responseAlbany<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;main&quot;</span>]
+			tempAlbany <span style="color: #333333">=</span> (yAlbany[<span style="background-color: #fff0f0">&quot;temp&quot;</span>] <span style="color: #333333">-</span> <span style="color: #6600EE; font-weight: bold">273.15</span>)<span style="color: #333333">*</span>(<span style="color: #0000DD; font-weight: bold">9</span><span style="color: #333333">/</span><span style="color: #0000DD; font-weight: bold">5</span>)<span style="color: #333333">+</span><span style="color: #0000DD; font-weight: bold">32</span> 
+			humAlbany <span style="color: #333333">=</span> yAlbany[<span style="background-color: #fff0f0">&quot;humidity&quot;</span>]
+			windAlbany <span style="color: #333333">=</span> responseAlbany<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;wind&quot;</span>][<span style="background-color: #fff0f0">&quot;speed&quot;</span>]
+			cloudAlbany <span style="color: #333333">=</span> responseAlbany<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;clouds&quot;</span>][<span style="background-color: #fff0f0">&quot;all&quot;</span>]
+			
+			yBinghamton <span style="color: #333333">=</span> responseBinghamton<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;main&quot;</span>]
+			tempBinghamton <span style="color: #333333">=</span> (yBinghamton[<span style="background-color: #fff0f0">&quot;temp&quot;</span>] <span style="color: #333333">-</span> <span style="color: #6600EE; font-weight: bold">273.15</span>)<span style="color: #333333">*</span>(<span style="color: #0000DD; font-weight: bold">9</span><span style="color: #333333">/</span><span style="color: #0000DD; font-weight: bold">5</span>)<span style="color: #333333">+</span><span style="color: #0000DD; font-weight: bold">32</span> 
+			humBinghamton <span style="color: #333333">=</span> yBinghamton[<span style="background-color: #fff0f0">&quot;humidity&quot;</span>]
+			windBinghamton <span style="color: #333333">=</span> responseBinghamton<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;wind&quot;</span>][<span style="background-color: #fff0f0">&quot;speed&quot;</span>]
+			cloudBinghamton <span style="color: #333333">=</span> responseBinghamton<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;clouds&quot;</span>][<span style="background-color: #fff0f0">&quot;all&quot;</span>]
+			
+			yBuffalo <span style="color: #333333">=</span> responseBuffalo<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;main&quot;</span>]
+			tempBuffalo <span style="color: #333333">=</span> (yBuffalo[<span style="background-color: #fff0f0">&quot;temp&quot;</span>] <span style="color: #333333">-</span> <span style="color: #6600EE; font-weight: bold">273.15</span>)<span style="color: #333333">*</span>(<span style="color: #0000DD; font-weight: bold">9</span><span style="color: #333333">/</span><span style="color: #0000DD; font-weight: bold">5</span>)<span style="color: #333333">+</span><span style="color: #0000DD; font-weight: bold">32</span> 
+			humBuffalo <span style="color: #333333">=</span> yBuffalo[<span style="background-color: #fff0f0">&quot;humidity&quot;</span>]
+			windBuffalo <span style="color: #333333">=</span> responseBuffalo<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;wind&quot;</span>][<span style="background-color: #fff0f0">&quot;speed&quot;</span>]
+			cloudBuffalo <span style="color: #333333">=</span> responseBuffalo<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;clouds&quot;</span>][<span style="background-color: #fff0f0">&quot;all&quot;</span>]
+			
+			yCorning <span style="color: #333333">=</span> responseCorning<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;main&quot;</span>]
+			tempCorning <span style="color: #333333">=</span> (yCorning[<span style="background-color: #fff0f0">&quot;temp&quot;</span>] <span style="color: #333333">-</span> <span style="color: #6600EE; font-weight: bold">273.15</span>)<span style="color: #333333">*</span>(<span style="color: #0000DD; font-weight: bold">9</span><span style="color: #333333">/</span><span style="color: #0000DD; font-weight: bold">5</span>)<span style="color: #333333">+</span><span style="color: #0000DD; font-weight: bold">32</span> 
+			humCorning <span style="color: #333333">=</span> yCorning[<span style="background-color: #fff0f0">&quot;humidity&quot;</span>]
+			windCorning <span style="color: #333333">=</span> responseCorning<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;wind&quot;</span>][<span style="background-color: #fff0f0">&quot;speed&quot;</span>]
+			cloudCorning <span style="color: #333333">=</span> responseCorning<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;clouds&quot;</span>][<span style="background-color: #fff0f0">&quot;all&quot;</span>]
+			
+			yGlensFalls <span style="color: #333333">=</span> responseGlensFalls<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;main&quot;</span>]
+			tempGlensFalls <span style="color: #333333">=</span> (yGlensFalls[<span style="background-color: #fff0f0">&quot;temp&quot;</span>] <span style="color: #333333">-</span> <span style="color: #6600EE; font-weight: bold">273.15</span>)<span style="color: #333333">*</span>(<span style="color: #0000DD; font-weight: bold">9</span><span style="color: #333333">/</span><span style="color: #0000DD; font-weight: bold">5</span>)<span style="color: #333333">+</span><span style="color: #0000DD; font-weight: bold">32</span> 
+			humGlensFalls <span style="color: #333333">=</span> yGlensFalls[<span style="background-color: #fff0f0">&quot;humidity&quot;</span>]
+			windGlensFalls <span style="color: #333333">=</span> responseGlensFalls<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;wind&quot;</span>][<span style="background-color: #fff0f0">&quot;speed&quot;</span>]
+			cloudGlensFalls <span style="color: #333333">=</span> responseGlensFalls<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;clouds&quot;</span>][<span style="background-color: #fff0f0">&quot;all&quot;</span>]
+			
+			yIthaca <span style="color: #333333">=</span> responseIthaca<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;main&quot;</span>]
+			tempIthaca <span style="color: #333333">=</span> (yIthaca[<span style="background-color: #fff0f0">&quot;temp&quot;</span>] <span style="color: #333333">-</span> <span style="color: #6600EE; font-weight: bold">273.15</span>)<span style="color: #333333">*</span>(<span style="color: #0000DD; font-weight: bold">9</span><span style="color: #333333">/</span><span style="color: #0000DD; font-weight: bold">5</span>)<span style="color: #333333">+</span><span style="color: #0000DD; font-weight: bold">32</span> 
+			humIthaca <span style="color: #333333">=</span> yIthaca[<span style="background-color: #fff0f0">&quot;humidity&quot;</span>]
+			windIthaca <span style="color: #333333">=</span> responseIthaca<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;wind&quot;</span>][<span style="background-color: #fff0f0">&quot;speed&quot;</span>]
+			cloudIthaca <span style="color: #333333">=</span> responseIthaca<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;clouds&quot;</span>][<span style="background-color: #fff0f0">&quot;all&quot;</span>]
+			
+			yJamestown <span style="color: #333333">=</span> responseJamestown<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;main&quot;</span>]
+			tempJamestown <span style="color: #333333">=</span> (yJamestown[<span style="background-color: #fff0f0">&quot;temp&quot;</span>] <span style="color: #333333">-</span> <span style="color: #6600EE; font-weight: bold">273.15</span>)<span style="color: #333333">*</span>(<span style="color: #0000DD; font-weight: bold">9</span><span style="color: #333333">/</span><span style="color: #0000DD; font-weight: bold">5</span>)<span style="color: #333333">+</span><span style="color: #0000DD; font-weight: bold">32</span> 
+			humJamestown <span style="color: #333333">=</span> yJamestown[<span style="background-color: #fff0f0">&quot;humidity&quot;</span>]
+			windJamestown <span style="color: #333333">=</span> responseJamestown<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;wind&quot;</span>][<span style="background-color: #fff0f0">&quot;speed&quot;</span>]
+			cloudJamestown <span style="color: #333333">=</span> responseJamestown<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;clouds&quot;</span>][<span style="background-color: #fff0f0">&quot;all&quot;</span>]
+			
+			yLakePlacid <span style="color: #333333">=</span> responseLakePlacid<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;main&quot;</span>]
+			tempLakePlacid <span style="color: #333333">=</span> (yLakePlacid[<span style="background-color: #fff0f0">&quot;temp&quot;</span>] <span style="color: #333333">-</span> <span style="color: #6600EE; font-weight: bold">273.15</span>)<span style="color: #333333">*</span>(<span style="color: #0000DD; font-weight: bold">9</span><span style="color: #333333">/</span><span style="color: #0000DD; font-weight: bold">5</span>)<span style="color: #333333">+</span><span style="color: #0000DD; font-weight: bold">32</span> 
+			humLakePlacid <span style="color: #333333">=</span> yLakePlacid[<span style="background-color: #fff0f0">&quot;humidity&quot;</span>]
+			windLakePlacid <span style="color: #333333">=</span> responseLakePlacid<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;wind&quot;</span>][<span style="background-color: #fff0f0">&quot;speed&quot;</span>]
+			cloudLakePlacid <span style="color: #333333">=</span> responseLakePlacid<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;clouds&quot;</span>][<span style="background-color: #fff0f0">&quot;all&quot;</span>]
+			
+			yLongIsland <span style="color: #333333">=</span> responseLongIsland<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;main&quot;</span>]
+			tempLongIsland <span style="color: #333333">=</span> (yLongIsland[<span style="background-color: #fff0f0">&quot;temp&quot;</span>] <span style="color: #333333">-</span> <span style="color: #6600EE; font-weight: bold">273.15</span>)<span style="color: #333333">*</span>(<span style="color: #0000DD; font-weight: bold">9</span><span style="color: #333333">/</span><span style="color: #0000DD; font-weight: bold">5</span>)<span style="color: #333333">+</span><span style="color: #0000DD; font-weight: bold">32</span> 
+			humLongIsland <span style="color: #333333">=</span> yLongIsland[<span style="background-color: #fff0f0">&quot;humidity&quot;</span>]
+			windLongIsland <span style="color: #333333">=</span> responseLongIsland<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;wind&quot;</span>][<span style="background-color: #fff0f0">&quot;speed&quot;</span>]
+			cloudLongIsland <span style="color: #333333">=</span> responseLongIsland<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;clouds&quot;</span>][<span style="background-color: #fff0f0">&quot;all&quot;</span>]
+			
+			yMassena <span style="color: #333333">=</span> responseMassena<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;main&quot;</span>]
+			tempMassena <span style="color: #333333">=</span> (yMassena[<span style="background-color: #fff0f0">&quot;temp&quot;</span>] <span style="color: #333333">-</span> <span style="color: #6600EE; font-weight: bold">273.15</span>)<span style="color: #333333">*</span>(<span style="color: #0000DD; font-weight: bold">9</span><span style="color: #333333">/</span><span style="color: #0000DD; font-weight: bold">5</span>)<span style="color: #333333">+</span><span style="color: #0000DD; font-weight: bold">32</span> 
+			humMassena <span style="color: #333333">=</span> yMassena[<span style="background-color: #fff0f0">&quot;humidity&quot;</span>]
+			windMassena <span style="color: #333333">=</span> responseMassena<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;wind&quot;</span>][<span style="background-color: #fff0f0">&quot;speed&quot;</span>]
+			cloudMassena <span style="color: #333333">=</span> responseMassena<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;clouds&quot;</span>][<span style="background-color: #fff0f0">&quot;all&quot;</span>]
+			
+			yNewYorkCity <span style="color: #333333">=</span> responseNewYorkCity<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;main&quot;</span>]
+			tempNewYorkCity <span style="color: #333333">=</span> (yNewYorkCity[<span style="background-color: #fff0f0">&quot;temp&quot;</span>] <span style="color: #333333">-</span> <span style="color: #6600EE; font-weight: bold">273.15</span>)<span style="color: #333333">*</span>(<span style="color: #0000DD; font-weight: bold">9</span><span style="color: #333333">/</span><span style="color: #0000DD; font-weight: bold">5</span>)<span style="color: #333333">+</span><span style="color: #0000DD; font-weight: bold">32</span> 
+			humNewYorkCity <span style="color: #333333">=</span> yNewYorkCity[<span style="background-color: #fff0f0">&quot;humidity&quot;</span>]
+			windNewYorkCity <span style="color: #333333">=</span> responseNewYorkCity<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;wind&quot;</span>][<span style="background-color: #fff0f0">&quot;speed&quot;</span>]
+			cloudNewYorkCity <span style="color: #333333">=</span> responseNewYorkCity<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;clouds&quot;</span>][<span style="background-color: #fff0f0">&quot;all&quot;</span>]
+			
+			yNiagaraFalls <span style="color: #333333">=</span> responseNiagaraFalls<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;main&quot;</span>]
+			tempNiagaraFalls <span style="color: #333333">=</span> (yNiagaraFalls[<span style="background-color: #fff0f0">&quot;temp&quot;</span>] <span style="color: #333333">-</span> <span style="color: #6600EE; font-weight: bold">273.15</span>)<span style="color: #333333">*</span>(<span style="color: #0000DD; font-weight: bold">9</span><span style="color: #333333">/</span><span style="color: #0000DD; font-weight: bold">5</span>)<span style="color: #333333">+</span><span style="color: #0000DD; font-weight: bold">32</span> 
+			humNiagaraFalls <span style="color: #333333">=</span> yNiagaraFalls[<span style="background-color: #fff0f0">&quot;humidity&quot;</span>]
+			windNiagaraFalls <span style="color: #333333">=</span> responseNiagaraFalls<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;wind&quot;</span>][<span style="background-color: #fff0f0">&quot;speed&quot;</span>]
+			cloudNiagaraFalls <span style="color: #333333">=</span> responseNiagaraFalls<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;clouds&quot;</span>][<span style="background-color: #fff0f0">&quot;all&quot;</span>]
+			
+			yPlattsburgh <span style="color: #333333">=</span> responsePlattsburgh<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;main&quot;</span>]
+			tempPlattsburgh <span style="color: #333333">=</span> (yPlattsburgh[<span style="background-color: #fff0f0">&quot;temp&quot;</span>] <span style="color: #333333">-</span> <span style="color: #6600EE; font-weight: bold">273.15</span>)<span style="color: #333333">*</span>(<span style="color: #0000DD; font-weight: bold">9</span><span style="color: #333333">/</span><span style="color: #0000DD; font-weight: bold">5</span>)<span style="color: #333333">+</span><span style="color: #0000DD; font-weight: bold">32</span> 
+			humPlattsburgh <span style="color: #333333">=</span> yPlattsburgh[<span style="background-color: #fff0f0">&quot;humidity&quot;</span>]
+			windPlattsburgh <span style="color: #333333">=</span> responsePlattsburgh<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;wind&quot;</span>][<span style="background-color: #fff0f0">&quot;speed&quot;</span>]
+			cloudPlattsburgh <span style="color: #333333">=</span> responsePlattsburgh<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;clouds&quot;</span>][<span style="background-color: #fff0f0">&quot;all&quot;</span>]
+			
+			yPoughkeepsie <span style="color: #333333">=</span> responsePoughkeepsie<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;main&quot;</span>]
+			tempPoughkeepsie <span style="color: #333333">=</span> (yPoughkeepsie[<span style="background-color: #fff0f0">&quot;temp&quot;</span>] <span style="color: #333333">-</span> <span style="color: #6600EE; font-weight: bold">273.15</span>)<span style="color: #333333">*</span>(<span style="color: #0000DD; font-weight: bold">9</span><span style="color: #333333">/</span><span style="color: #0000DD; font-weight: bold">5</span>)<span style="color: #333333">+</span><span style="color: #0000DD; font-weight: bold">32</span> 
+			humPoughkeepsie <span style="color: #333333">=</span> yPoughkeepsie[<span style="background-color: #fff0f0">&quot;humidity&quot;</span>]
+			windPoughkeepsie <span style="color: #333333">=</span> responsePoughkeepsie<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;wind&quot;</span>][<span style="background-color: #fff0f0">&quot;speed&quot;</span>]
+			cloudPoughkeepsie <span style="color: #333333">=</span> responsePoughkeepsie<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;clouds&quot;</span>][<span style="background-color: #fff0f0">&quot;all&quot;</span>]
+			
+			yRochester <span style="color: #333333">=</span> responseRochester<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;main&quot;</span>]
+			tempRochester <span style="color: #333333">=</span> (yRochester[<span style="background-color: #fff0f0">&quot;temp&quot;</span>] <span style="color: #333333">-</span> <span style="color: #6600EE; font-weight: bold">273.15</span>)<span style="color: #333333">*</span>(<span style="color: #0000DD; font-weight: bold">9</span><span style="color: #333333">/</span><span style="color: #0000DD; font-weight: bold">5</span>)<span style="color: #333333">+</span><span style="color: #0000DD; font-weight: bold">32</span> 
+			humRochester <span style="color: #333333">=</span> yRochester[<span style="background-color: #fff0f0">&quot;humidity&quot;</span>]
+			windRochester <span style="color: #333333">=</span> responseRochester<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;wind&quot;</span>][<span style="background-color: #fff0f0">&quot;speed&quot;</span>]
+			cloudRochester <span style="color: #333333">=</span> responseRochester<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;clouds&quot;</span>][<span style="background-color: #fff0f0">&quot;all&quot;</span>]
+			
+			ySyracuse <span style="color: #333333">=</span> responseSyracuse<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;main&quot;</span>]
+			tempSyracuse <span style="color: #333333">=</span> (ySyracuse[<span style="background-color: #fff0f0">&quot;temp&quot;</span>] <span style="color: #333333">-</span> <span style="color: #6600EE; font-weight: bold">273.15</span>)<span style="color: #333333">*</span>(<span style="color: #0000DD; font-weight: bold">9</span><span style="color: #333333">/</span><span style="color: #0000DD; font-weight: bold">5</span>)<span style="color: #333333">+</span><span style="color: #0000DD; font-weight: bold">32</span> 
+			humSyracuse <span style="color: #333333">=</span> ySyracuse[<span style="background-color: #fff0f0">&quot;humidity&quot;</span>]
+			windSyracuse <span style="color: #333333">=</span> responseSyracuse<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;wind&quot;</span>][<span style="background-color: #fff0f0">&quot;speed&quot;</span>]
+			cloudSyracuse <span style="color: #333333">=</span> responseSyracuse<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;clouds&quot;</span>][<span style="background-color: #fff0f0">&quot;all&quot;</span>]
+			
+			yWatertown <span style="color: #333333">=</span> responseWatertown<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;main&quot;</span>]
+			tempWatertown <span style="color: #333333">=</span> (yWatertown[<span style="background-color: #fff0f0">&quot;temp&quot;</span>] <span style="color: #333333">-</span> <span style="color: #6600EE; font-weight: bold">273.15</span>)<span style="color: #333333">*</span>(<span style="color: #0000DD; font-weight: bold">9</span><span style="color: #333333">/</span><span style="color: #0000DD; font-weight: bold">5</span>)<span style="color: #333333">+</span><span style="color: #0000DD; font-weight: bold">32</span> 
+			humWatertown <span style="color: #333333">=</span> yWatertown[<span style="background-color: #fff0f0">&quot;humidity&quot;</span>]
+			windWatertown <span style="color: #333333">=</span> responseWatertown<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;wind&quot;</span>][<span style="background-color: #fff0f0">&quot;speed&quot;</span>]
+			cloudWatertown <span style="color: #333333">=</span> responseWatertown<span style="color: #333333">.</span>json()[<span style="background-color: #fff0f0">&quot;clouds&quot;</span>][<span style="background-color: #fff0f0">&quot;all&quot;</span>]
+			
+			<span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;Delhi&quot;</span>); <span style="color: #008800; font-weight: bold">print</span>(responseDelhi<span style="color: #333333">.</span>json())
+			
+		time<span style="color: #333333">.</span>sleep(<span style="color: #6600EE; font-weight: bold">0.5</span>)
+	    
+    <span style="color: #008800; font-weight: bold">return</span> tempAlbany,humAlbany,windAlbany,cloudAlbany,tempBinghamton,humBinghamton,windBinghamton,cloudBinghamton,tempBuffalo,humBuffalo,windBuffalo,cloudBuffalo,tempCorning,humCorning,windCorning,cloudCorning,tempGlensFalls,humGlensFalls,windGlensFalls,cloudGlensFalls,tempIthaca,humIthaca,windIthaca,cloudIthaca,tempJamestown,humJamestown,windJamestown,cloudJamestown,tempLakePlacid,humLakePlacid,windLakePlacid,cloudLakePlacid,tempLongIsland,humLongIsland,windLongIsland,cloudLongIsland,tempMassena,humMassena,windMassena,cloudMassena,tempNewYorkCity,humNewYorkCity,windNewYorkCity,cloudNewYorkCity,tempNiagaraFalls,humNiagaraFalls,windNiagaraFalls,cloudNiagaraFalls,tempPlattsburgh,humPlattsburgh,windPlattsburgh,cloudPlattsburgh,tempPoughkeepsie,humPoughkeepsie,windPoughkeepsie,cloudPoughkeepsie,tempRochester,humRochester,windRochester,cloudRochester,tempSyracuse,humSyracuse,windSyracuse,cloudSyracuse,tempWatertown,humWatertown,windWatertown,cloudWatertown
+
+<span style="color: #888888"># set LED color based on relative temperature    </span>
+<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">LED_Temp_Color</span>(tempAlbany,humAlbany,windAlbany,cloudAlbany,tempBinghamton,humBinghamton,windBinghamton,cloudBinghamton,tempBuffalo,humBuffalo,windBuffalo,cloudBuffalo,tempCorning,humCorning,windCorning,cloudCorning,tempGlensFalls,humGlensFalls,windGlensFalls,cloudGlensFalls,tempIthaca,humIthaca,windIthaca,cloudIthaca,tempJamestown,humJamestown,windJamestown,cloudJamestown,tempLakePlacid,humLakePlacid,windLakePlacid,cloudLakePlacid,tempLongIsland,humLongIsland,windLongIsland,cloudLongIsland,tempMassena,humMassena,windMassena,cloudMassena,tempNewYorkCity,humNewYorkCity,windNewYorkCity,cloudNewYorkCity,tempNiagaraFalls,humNiagaraFalls,windNiagaraFalls,cloudNiagaraFalls,tempPlattsburgh,humPlattsburgh,windPlattsburgh,cloudPlattsburgh,tempPoughkeepsie,humPoughkeepsie,windPoughkeepsie,cloudPoughkeepsie,tempRochester,humRochester,windRochester,cloudRochester,tempSyracuse,humSyracuse,windSyracuse,cloudSyracuse,tempWatertown,humWatertown,windWatertown,cloudWatertown):
+    tempVec <span style="color: #333333">=</span> [tempAlbany,tempBinghamton,tempBuffalo,tempCorning,tempGlensFalls,tempIthaca,tempJamestown,tempLakePlacid,tempLongIsland,tempMassena,tempNewYorkCity,tempNiagaraFalls,tempPlattsburgh,tempPoughkeepsie,tempRochester,tempSyracuse,tempWatertown]
+    <span style="color: #008800; font-weight: bold">print</span>(tempVec)
+    
+    minTemp <span style="color: #333333">=</span> <span style="color: #007020">min</span>(tempVec)
+    maxTemp <span style="color: #333333">=</span> <span style="color: #007020">max</span>(tempVec)
+    
+    tempDiff <span style="color: #333333">=</span> (maxTemp <span style="color: #333333">-</span> minTemp)<span style="color: #333333">/</span><span style="color: #0000DD; font-weight: bold">5</span>
+    
+    range1 <span style="color: #333333">=</span> minTemp <span style="color: #333333">+</span> tempDiff
+    range2 <span style="color: #333333">=</span> range1 <span style="color: #333333">+</span> tempDiff
+    range3 <span style="color: #333333">=</span> range2 <span style="color: #333333">+</span> tempDiff
+    range4 <span style="color: #333333">=</span> range3 <span style="color: #333333">+</span> tempDiff
+    range5 <span style="color: #333333">=</span> range4 <span style="color: #333333">+</span> tempDiff
+    <span style="color: #008800; font-weight: bold">print</span>(range1); <span style="color: #008800; font-weight: bold">print</span>(range2); <span style="color: #008800; font-weight: bold">print</span>(range3); <span style="color: #008800; font-weight: bold">print</span>(range4); <span style="color: #008800; font-weight: bold">print</span>(range5)
+    
+    <span style="color: #008800; font-weight: bold">if</span> tempAlbany <span style="color: #333333">&lt;=</span> range1:
+	    colorAlbany <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempAlbany <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> tempAlbany <span style="color: #333333">&lt;=</span> range2:
+	    colorAlbany <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">6</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempAlbany <span style="color: #333333">&gt;</span> range2 <span style="color: #000000; font-weight: bold">and</span> tempAlbany <span style="color: #333333">&lt;=</span> range3:
+	    colorAlbany <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">4</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempAlbany <span style="color: #333333">&gt;</span> range3 <span style="color: #000000; font-weight: bold">and</span> tempAlbany <span style="color: #333333">&lt;=</span> range4:
+	    colorAlbany <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempAlbany <span style="color: #333333">&gt;</span> range4:
+	    colorAlbany <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+	    
+    <span style="color: #008800; font-weight: bold">if</span> tempBinghamton <span style="color: #333333">&lt;=</span> range1:
+	    colorBinghamton <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempBinghamton <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> tempBinghamton <span style="color: #333333">&lt;=</span> range2:
+	    colorBinghamton <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">6</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempBinghamton <span style="color: #333333">&gt;</span> range2 <span style="color: #000000; font-weight: bold">and</span> tempBinghamton <span style="color: #333333">&lt;=</span> range3:
+	    colorBinghamton <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">4</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempBinghamton <span style="color: #333333">&gt;</span> range3 <span style="color: #000000; font-weight: bold">and</span> tempBinghamton <span style="color: #333333">&lt;=</span> range4:
+	    colorBinghamton <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempBinghamton <span style="color: #333333">&gt;</span> range4:
+	    colorBinghamton <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>	
+	    
+    <span style="color: #008800; font-weight: bold">if</span> tempBuffalo <span style="color: #333333">&lt;=</span> range1:
+	    colorBuffalo <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempBuffalo <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> tempBuffalo <span style="color: #333333">&lt;=</span> range2:
+	    colorBuffalo <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">6</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempBuffalo <span style="color: #333333">&gt;</span> range2 <span style="color: #000000; font-weight: bold">and</span> tempBuffalo <span style="color: #333333">&lt;=</span> range3:
+	    colorBuffalo <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">4</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempBuffalo <span style="color: #333333">&gt;</span> range3 <span style="color: #000000; font-weight: bold">and</span> tempBuffalo <span style="color: #333333">&lt;=</span> range4:
+	    colorBuffalo <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempBuffalo <span style="color: #333333">&gt;</span> range4:
+	    colorBuffalo <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>	
+	    
+    <span style="color: #008800; font-weight: bold">if</span> tempCorning <span style="color: #333333">&lt;=</span> range1:
+	    colorCorning <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempCorning <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> tempCorning <span style="color: #333333">&lt;=</span> range2:
+	    colorCorning <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">6</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempCorning <span style="color: #333333">&gt;</span> range2 <span style="color: #000000; font-weight: bold">and</span> tempCorning <span style="color: #333333">&lt;=</span> range3:
+	    colorCorning <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">4</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempCorning <span style="color: #333333">&gt;</span> range3 <span style="color: #000000; font-weight: bold">and</span> tempCorning <span style="color: #333333">&lt;=</span> range4:
+	    colorCorning <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempCorning <span style="color: #333333">&gt;</span> range4:
+	    colorCorning <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>	
+	    
+    <span style="color: #008800; font-weight: bold">if</span> tempGlensFalls <span style="color: #333333">&lt;=</span> range1:
+	    colorGlensFalls <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempGlensFalls <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> tempGlensFalls <span style="color: #333333">&lt;=</span> range2:
+	    colorGlensFalls <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">6</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempGlensFalls <span style="color: #333333">&gt;</span> range2 <span style="color: #000000; font-weight: bold">and</span> tempGlensFalls <span style="color: #333333">&lt;=</span> range3:
+	    colorGlensFalls <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">4</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempGlensFalls <span style="color: #333333">&gt;</span> range3 <span style="color: #000000; font-weight: bold">and</span> tempGlensFalls <span style="color: #333333">&lt;=</span> range4:
+	    colorGlensFalls <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempGlensFalls <span style="color: #333333">&gt;</span> range4:
+	    colorGlensFalls <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>	
+    
+    <span style="color: #008800; font-weight: bold">if</span> tempIthaca <span style="color: #333333">&lt;=</span> range1:
+	    colorIthaca <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempIthaca <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> tempIthaca <span style="color: #333333">&lt;=</span> range2:
+	    colorIthaca <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">6</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempIthaca <span style="color: #333333">&gt;</span> range2 <span style="color: #000000; font-weight: bold">and</span> tempIthaca <span style="color: #333333">&lt;=</span> range3:
+	    colorIthaca <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">4</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempIthaca <span style="color: #333333">&gt;</span> range3 <span style="color: #000000; font-weight: bold">and</span> tempIthaca <span style="color: #333333">&lt;=</span> range4:
+	    colorIthaca <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempIthaca <span style="color: #333333">&gt;</span> range4:
+	    colorIthaca <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>	
+    
+    <span style="color: #008800; font-weight: bold">if</span> tempJamestown <span style="color: #333333">&lt;=</span> range1:
+	    colorJamestown <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempJamestown <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> tempJamestown <span style="color: #333333">&lt;=</span> range2:
+	    colorJamestown <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">6</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempJamestown <span style="color: #333333">&gt;</span> range2 <span style="color: #000000; font-weight: bold">and</span> tempJamestown <span style="color: #333333">&lt;=</span> range3:
+	    colorJamestown <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">4</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempJamestown <span style="color: #333333">&gt;</span> range3 <span style="color: #000000; font-weight: bold">and</span> tempJamestown <span style="color: #333333">&lt;=</span> range4:
+	    colorJamestown <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempJamestown <span style="color: #333333">&gt;</span> range4:
+	    colorJamestown <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>	
+	    
+    <span style="color: #008800; font-weight: bold">if</span> tempLakePlacid <span style="color: #333333">&lt;=</span> range1:
+	    colorLakePlacid <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempLakePlacid <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> tempLakePlacid <span style="color: #333333">&lt;=</span> range2:
+	    colorLakePlacid <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">6</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempLakePlacid <span style="color: #333333">&gt;</span> range2 <span style="color: #000000; font-weight: bold">and</span> tempLakePlacid <span style="color: #333333">&lt;=</span> range3:
+	    colorLakePlacid <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">4</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempLakePlacid <span style="color: #333333">&gt;</span> range3 <span style="color: #000000; font-weight: bold">and</span> tempLakePlacid <span style="color: #333333">&lt;=</span> range4:
+	    colorLakePlacid <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempLakePlacid <span style="color: #333333">&gt;</span> range4:
+	    colorLakePlacid <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+	    
+    <span style="color: #008800; font-weight: bold">if</span> tempLongIsland <span style="color: #333333">&lt;=</span> range1:
+	    colorLongIsland <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempLongIsland <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> tempLongIsland <span style="color: #333333">&lt;=</span> range2:
+	    colorLongIsland <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">6</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempLongIsland <span style="color: #333333">&gt;</span> range2 <span style="color: #000000; font-weight: bold">and</span> tempLongIsland <span style="color: #333333">&lt;=</span> range3:
+	    colorLongIsland <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">4</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempLongIsland <span style="color: #333333">&gt;</span> range3 <span style="color: #000000; font-weight: bold">and</span> tempLongIsland <span style="color: #333333">&lt;=</span> range4:
+	    colorLongIsland <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempLongIsland <span style="color: #333333">&gt;</span> range4:
+	    colorLongIsland <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+	    
+    <span style="color: #008800; font-weight: bold">if</span> tempMassena <span style="color: #333333">&lt;=</span> range1:
+	    colorMassena <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempMassena <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> tempMassena <span style="color: #333333">&lt;=</span> range2:
+	    colorMassena <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">6</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempMassena <span style="color: #333333">&gt;</span> range2 <span style="color: #000000; font-weight: bold">and</span> tempMassena <span style="color: #333333">&lt;=</span> range3:
+	    colorMassena <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">4</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempMassena <span style="color: #333333">&gt;</span> range3 <span style="color: #000000; font-weight: bold">and</span> tempMassena <span style="color: #333333">&lt;=</span> range4:
+	    colorMassena <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> v <span style="color: #333333">&gt;</span> range4:
+	    colorMassena <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+	    
+    <span style="color: #008800; font-weight: bold">if</span> tempNewYorkCity <span style="color: #333333">&lt;=</span> range1:
+	    colorNewYorkCity <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempNewYorkCity <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> tempNewYorkCity <span style="color: #333333">&lt;=</span> range2:
+	    colorNewYorkCity <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">6</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempNewYorkCity <span style="color: #333333">&gt;</span> range2 <span style="color: #000000; font-weight: bold">and</span> tempNewYorkCity <span style="color: #333333">&lt;=</span> range3:
+	    colorNewYorkCity <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">4</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempNewYorkCity <span style="color: #333333">&gt;</span> range3 <span style="color: #000000; font-weight: bold">and</span> tempNewYorkCity <span style="color: #333333">&lt;=</span> range4:
+	    colorNewYorkCity <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempNewYorkCity <span style="color: #333333">&gt;</span> range4:
+	    colorNewYorkCity <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+	    
+    <span style="color: #008800; font-weight: bold">if</span> tempNiagaraFalls <span style="color: #333333">&lt;=</span> range1:
+	    colorNiagaraFalls <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempNiagaraFalls <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> tempNiagaraFalls <span style="color: #333333">&lt;=</span> range2:
+	    colorNiagaraFalls <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">6</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempNiagaraFalls <span style="color: #333333">&gt;</span> range2 <span style="color: #000000; font-weight: bold">and</span> tempNiagaraFalls <span style="color: #333333">&lt;=</span> range3:
+	    colorNiagaraFalls <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">4</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempNiagaraFalls <span style="color: #333333">&gt;</span> range3 <span style="color: #000000; font-weight: bold">and</span> tempNiagaraFalls <span style="color: #333333">&lt;=</span> range4:
+	    colorNiagaraFalls <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempNiagaraFalls <span style="color: #333333">&gt;</span> range4:
+	    colorNiagaraFalls <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+	    
+    <span style="color: #008800; font-weight: bold">if</span> tempPlattsburgh <span style="color: #333333">&lt;=</span> range1:
+	    colorPlattsburgh <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempPlattsburgh <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> tempPlattsburgh <span style="color: #333333">&lt;=</span> range2:
+	    colorPlattsburgh <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">6</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempPlattsburgh <span style="color: #333333">&gt;</span> range2 <span style="color: #000000; font-weight: bold">and</span> tempPlattsburgh <span style="color: #333333">&lt;=</span> range3:
+	    colorPlattsburgh <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">4</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempPlattsburgh <span style="color: #333333">&gt;</span> range3 <span style="color: #000000; font-weight: bold">and</span> tempPlattsburgh <span style="color: #333333">&lt;=</span> range4:
+	    colorPlattsburgh <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempPlattsburgh <span style="color: #333333">&gt;</span> range4:
+	    colorPlattsburgh <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+	    
+    <span style="color: #008800; font-weight: bold">if</span> tempPoughkeepsie <span style="color: #333333">&lt;=</span> range1:
+	    colorPoughkeepsie <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempPoughkeepsie <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> tempPoughkeepsie <span style="color: #333333">&lt;=</span> range2:
+	    colorPoughkeepsie <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">6</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempPoughkeepsie <span style="color: #333333">&gt;</span> range2 <span style="color: #000000; font-weight: bold">and</span> tempPoughkeepsie <span style="color: #333333">&lt;=</span> range3:
+	    colorPoughkeepsie <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">4</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempPoughkeepsie <span style="color: #333333">&gt;</span> range3 <span style="color: #000000; font-weight: bold">and</span> tempPoughkeepsie <span style="color: #333333">&lt;=</span> range4:
+	    colorPoughkeepsie <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempPoughkeepsie <span style="color: #333333">&gt;</span> range4:
+	    colorPoughkeepsie <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+	    
+    <span style="color: #008800; font-weight: bold">if</span> tempRochester <span style="color: #333333">&lt;=</span> range1:
+	    colorRochester <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempRochester <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> tempRochester <span style="color: #333333">&lt;=</span> range2:
+	    colorRochester <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">6</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempRochester <span style="color: #333333">&gt;</span> range2 <span style="color: #000000; font-weight: bold">and</span> tempRochester <span style="color: #333333">&lt;=</span> range3:
+	    colorRochester <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">4</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempRochester <span style="color: #333333">&gt;</span> range3 <span style="color: #000000; font-weight: bold">and</span> tempRochester <span style="color: #333333">&lt;=</span> range4:
+	    colorRochester <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempRochester <span style="color: #333333">&gt;</span> range4:
+	    colorRochester <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+	    
+    <span style="color: #008800; font-weight: bold">if</span> tempSyracuse <span style="color: #333333">&lt;=</span> range1:
+	    colorSyracuse <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempSyracuse <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> tempSyracuse <span style="color: #333333">&lt;=</span> range2:
+	    colorSyracuse <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">6</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempSyracuse <span style="color: #333333">&gt;</span> range2 <span style="color: #000000; font-weight: bold">and</span> tempSyracuse <span style="color: #333333">&lt;=</span> range3:
+	    colorSyracuse <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">4</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempSyracuse <span style="color: #333333">&gt;</span> range3 <span style="color: #000000; font-weight: bold">and</span> tempSyracuse <span style="color: #333333">&lt;=</span> range4:
+	    colorSyracuse <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempSyracuse <span style="color: #333333">&gt;</span> range4:
+	    colorSyracuse <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+	    
+    <span style="color: #008800; font-weight: bold">if</span> tempWatertown <span style="color: #333333">&lt;=</span> range1:
+	    colorWatertown <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempWatertown <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> tempWatertown <span style="color: #333333">&lt;=</span> range2:
+	    colorWatertown <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">6</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempWatertown <span style="color: #333333">&gt;</span> range2 <span style="color: #000000; font-weight: bold">and</span> tempWatertown <span style="color: #333333">&lt;=</span> range3:
+	    colorWatertown <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">4</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempWatertown <span style="color: #333333">&gt;</span> range3 <span style="color: #000000; font-weight: bold">and</span> tempWatertown <span style="color: #333333">&lt;=</span> range4:
+	    colorWatertown <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> tempWatertown <span style="color: #333333">&gt;</span> range4:
+	    colorWatertown <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+    
+    <span style="color: #008800; font-weight: bold">return</span> colorAlbany,colorBinghamton,colorBuffalo,colorCorning,colorGlensFalls,colorIthaca,colorJamestown,colorLakePlacid,colorLongIsland,colorMassena,colorNewYorkCity,colorNiagaraFalls,colorPlattsburgh,colorPoughkeepsie,colorRochester,colorSyracuse,colorWatertown
+    
+<span style="color: #888888"># set LED color based on relative humidity</span>
+<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">LED_Humid_Color</span>(tempAlbany,humAlbany,windAlbany,cloudAlbany,tempBinghamton,humBinghamton,windBinghamton,cloudBinghamton,tempBuffalo,humBuffalo,windBuffalo,cloudBuffalo,tempCorning,humCorning,windCorning,cloudCorning,tempGlensFalls,humGlensFalls,windGlensFalls,cloudGlensFalls,tempIthaca,humIthaca,windIthaca,cloudIthaca,tempJamestown,humJamestown,windJamestown,cloudJamestown,tempLakePlacid,humLakePlacid,windLakePlacid,cloudLakePlacid,tempLongIsland,humLongIsland,windLongIsland,cloudLongIsland,tempMassena,humMassena,windMassena,cloudMassena,tempNewYorkCity,humNewYorkCity,windNewYorkCity,cloudNewYorkCity,tempNiagaraFalls,humNiagaraFalls,windNiagaraFalls,cloudNiagaraFalls,tempPlattsburgh,humPlattsburgh,windPlattsburgh,cloudPlattsburgh,tempPoughkeepsie,humPoughkeepsie,windPoughkeepsie,cloudPoughkeepsie,tempRochester,humRochester,windRochester,cloudRochester,tempSyracuse,humSyracuse,windSyracuse,cloudSyracuse,tempWatertown,humWatertown,windWatertown,cloudWatertown):
+    humVec <span style="color: #333333">=</span> [humAlbany,humBinghamton,humBuffalo,humCorning,humGlensFalls,humIthaca,humJamestown,humLakePlacid,humLongIsland,humMassena,humNewYorkCity,humNiagaraFalls,humPlattsburgh,humPoughkeepsie,humRochester,humSyracuse,humWatertown]
+    <span style="color: #008800; font-weight: bold">print</span>(humVec)
+    
+    minHum <span style="color: #333333">=</span> <span style="color: #007020">min</span>(humVec)
+    maxHum <span style="color: #333333">=</span> <span style="color: #007020">max</span>(humVec)
+    
+    humDiff <span style="color: #333333">=</span> (maxHum <span style="color: #333333">-</span> minHum)<span style="color: #333333">/</span><span style="color: #0000DD; font-weight: bold">5</span>
+    
+    range1 <span style="color: #333333">=</span> minHum <span style="color: #333333">+</span> humDiff
+    range2 <span style="color: #333333">=</span> range1 <span style="color: #333333">+</span> humDiff
+    
+    <span style="color: #008800; font-weight: bold">print</span>(range1); <span style="color: #008800; font-weight: bold">print</span>(range2);
+    
+    <span style="color: #008800; font-weight: bold">if</span> humAlbany <span style="color: #333333">&lt;=</span> range1:
+	    colorAlbany <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humAlbany <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> humAlbany <span style="color: #333333">&lt;=</span> range2:
+	    colorAlbany <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humAlbany <span style="color: #333333">&gt;</span> range2 
+	    colorAlbany <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+	    
+    <span style="color: #008800; font-weight: bold">if</span> humBinghamton <span style="color: #333333">&lt;=</span> range1:
+	    colorBinghamton <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humBinghamton <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> humBinghamton <span style="color: #333333">&lt;=</span> range2:
+	    colorBinghamton <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humBinghamton <span style="color: #333333">&gt;</span> range2 
+	    colorBinghamton <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+	    
+    <span style="color: #008800; font-weight: bold">if</span> humBuffalo <span style="color: #333333">&lt;=</span> range1:
+	    colorBuffalo <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humBuffalo <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> humBuffalo <span style="color: #333333">&lt;=</span> range2:
+	    colorBuffalo <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humBuffalo <span style="color: #333333">&gt;</span> range2 
+	    colorBuffalo <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+	    
+    <span style="color: #008800; font-weight: bold">if</span> humCorning <span style="color: #333333">&lt;=</span> range1:
+	    colorCorning <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humCorning <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> humCorning <span style="color: #333333">&lt;=</span> range2:
+	    colorCorning <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humCorning <span style="color: #333333">&gt;</span> range2 
+	    colorCorning <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+	    
+    <span style="color: #008800; font-weight: bold">if</span> humGlensFalls <span style="color: #333333">&lt;=</span> range1:
+	    colorGlensFalls <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humGlensFalls <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> humGlensFalls <span style="color: #333333">&lt;=</span> range2:
+	    colorGlensFalls <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humGlensFalls <span style="color: #333333">&gt;</span> range2 
+	    colorGlensFalls <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+	    
+    <span style="color: #008800; font-weight: bold">if</span> humIthaca <span style="color: #333333">&lt;=</span> range1:
+	    colorIthaca <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humIthaca <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> humIthaca <span style="color: #333333">&lt;=</span> range2:
+	    colorIthaca <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humIthaca <span style="color: #333333">&gt;</span> range2 
+	    colorIthaca <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+	    
+    <span style="color: #008800; font-weight: bold">if</span> humJamestown <span style="color: #333333">&lt;=</span> range1:
+	    colorJamestown <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humJamestown <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> humJamestown <span style="color: #333333">&lt;=</span> range2:
+	    colorJamestown <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humJamestown <span style="color: #333333">&gt;</span> range2 
+	    colorJamestown <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+	    
+    <span style="color: #008800; font-weight: bold">if</span> humLakePlacid <span style="color: #333333">&lt;=</span> range1:
+	    colorLakePlacid <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humLakePlacid <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> humLakePlacid <span style="color: #333333">&lt;=</span> range2:
+	    colorLakePlacid <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humLakePlacid <span style="color: #333333">&gt;</span> range2 
+	    colorLakePlacid <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+
+    <span style="color: #008800; font-weight: bold">if</span> humLongIsland <span style="color: #333333">&lt;=</span> range1:
+	    colorLongIsland <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humLongIsland <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> humLongIsland <span style="color: #333333">&lt;=</span> range2:
+	    colorLongIsland <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humLongIsland <span style="color: #333333">&gt;</span> range2 
+	    colorLongIsland <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+	    
+    <span style="color: #008800; font-weight: bold">if</span> humMassena <span style="color: #333333">&lt;=</span> range1:
+	    colorMassena <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humMassena <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> humMassena <span style="color: #333333">&lt;=</span> range2:
+	    colorMassena <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humMassena <span style="color: #333333">&gt;</span> range2 
+	    colorMassena <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+
+    <span style="color: #008800; font-weight: bold">if</span> humNewYorkCity <span style="color: #333333">&lt;=</span> range1:
+	    colorNewYorkCity <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humNewYorkCity <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> humNewYorkCity <span style="color: #333333">&lt;=</span> range2:
+	    colorNewYorkCity <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humNewYorkCity <span style="color: #333333">&gt;</span> range2 
+	    colorNewYorkCity <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+	    
+    <span style="color: #008800; font-weight: bold">if</span> humNiagaraFalls <span style="color: #333333">&lt;=</span> range1:
+	    colorNiagaraFalls <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humNiagaraFalls <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> humNiagaraFalls <span style="color: #333333">&lt;=</span> range2:
+	    colorNiagaraFalls <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humNiagaraFalls <span style="color: #333333">&gt;</span> range2 
+	    colorNiagaraFalls <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+	    
+    <span style="color: #008800; font-weight: bold">if</span> humPlattsburgh <span style="color: #333333">&lt;=</span> range1:
+	    colorPlattsburgh <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humPlattsburgh <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> humPlattsburgh <span style="color: #333333">&lt;=</span> range2:
+	    colorPlattsburgh <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humPlattsburgh <span style="color: #333333">&gt;</span> range2 
+	    colorPlattsburgh <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+	    
+    <span style="color: #008800; font-weight: bold">if</span> humPoughkeepsie <span style="color: #333333">&lt;=</span> range1:
+	    colorPoughkeepsie <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humPoughkeepsie <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> humPoughkeepsie <span style="color: #333333">&lt;=</span> range2:
+	    colorPoughkeepsie <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humPoughkeepsie <span style="color: #333333">&gt;</span> range2 
+	    colorPoughkeepsie <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+
+    <span style="color: #008800; font-weight: bold">if</span> humRochester <span style="color: #333333">&lt;=</span> range1:
+	    colorRochester <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humRochester <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> humRochester <span style="color: #333333">&lt;=</span> range2:
+	    colorRochester <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humRochester <span style="color: #333333">&gt;</span> range2 
+	    colorRochester <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+	    
+    <span style="color: #008800; font-weight: bold">if</span> humSyracuse <span style="color: #333333">&lt;=</span> range1:
+	    colorSyracuse <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humSyracuse <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> humSyracuse <span style="color: #333333">&lt;=</span> range2:
+	    colorSyracuse <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humSyracuse <span style="color: #333333">&gt;</span> range2 
+	    colorSyracuse <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+	    
+    <span style="color: #008800; font-weight: bold">if</span> humWatertown <span style="color: #333333">&lt;=</span> range1:
+	    colorWatertown <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">7</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humWatertown <span style="color: #333333">&gt;</span> range1 <span style="color: #000000; font-weight: bold">and</span> humWatertown <span style="color: #333333">&lt;=</span> range2:
+	    colorWatertown <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">3</span>
+    <span style="color: #008800; font-weight: bold">elif</span> humWatertown <span style="color: #333333">&gt;</span> range2 
+	    colorWatertown <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+    
+    <span style="color: #008800; font-weight: bold">return</span> colorAlbany,colorBinghamton,colorBuffalo,colorCorning,colorGlensFalls,colorIthaca,colorJamestown,colorLakePlacid,colorLongIsland,colorMassena,colorNewYorkCity,colorNiagaraFalls,colorPlattsburgh,colorPoughkeepsie,colorRochester,colorSyracuse,colorWatertown
+
+(tempAlbany,humAlbany,windAlbany,cloudAlbany,tempBinghamton,humBinghamton,windBinghamton,cloudBinghamton,tempBuffalo,humBuffalo,windBuffalo,cloudBuffalo,tempCorning,humCorning,windCorning,cloudCorning,tempGlensFalls,humGlensFalls,windGlensFalls,cloudGlensFalls,tempIthaca,humIthaca,windIthaca,cloudIthaca,tempJamestown,humJamestown,windJamestown,cloudJamestown,tempLakePlacid,humLakePlacid,windLakePlacid,cloudLakePlacid,tempLongIsland,humLongIsland,windLongIsland,cloudLongIsland,tempMassena,humMassena,windMassena,cloudMassena,tempNewYorkCity,humNewYorkCity,windNewYorkCity,cloudNewYorkCity,tempNiagaraFalls,humNiagaraFalls,windNiagaraFalls,cloudNiagaraFalls,tempPlattsburgh,humPlattsburgh,windPlattsburgh,cloudPlattsburgh,tempPoughkeepsie,humPoughkeepsie,windPoughkeepsie,cloudPoughkeepsie,tempRochester,humRochester,windRochester,cloudRochester,tempSyracuse,humSyracuse,windSyracuse,cloudSyracuse,tempWatertown,humWatertown,windWatertown,cloudWatertown):
+    
+
+(tempAlbany,humAlbany,windAlbany,cloudAlbany,tempBinghamton,humBinghamton,windBinghamton,cloudBinghamton,tempBuffalo,humBuffalo,windBuffalo,cloudBuffalo,tempCorning,humCorning,windCorning,cloudCorning,tempGlensFalls,humGlensFalls,windGlensFalls,cloudGlensFalls,tempIthaca,humIthaca,windIthaca,cloudIthaca,tempJamestown,humJamestown,windJamestown,cloudJamestown,tempLakePlacid,humLakePlacid,windLakePlacid,cloudLakePlacid,tempLongIsland,humLongIsland,windLongIsland,cloudLongIsland,tempMassena,humMassena,windMassena,cloudMassena,tempNewYorkCity,humNewYorkCity,windNewYorkCity,cloudNewYorkCity,tempNiagaraFalls,humNiagaraFalls,windNiagaraFalls,cloudNiagaraFalls,tempPlattsburgh,humPlattsburgh,windPlattsburgh,cloudPlattsburgh,tempPoughkeepsie,humPoughkeepsie,windPoughkeepsie,cloudPoughkeepsie,tempRochester,humRochester,windRochester,cloudRochester,tempSyracuse,humSyracuse,windSyracuse,cloudSyracuse,tempWatertown,humWatertown,windWatertown,cloudWatertown) <span style="color: #333333">=</span> Data_Update()											
+
+<span style="color: #888888">#Temperature</span>
+(colorAlbany,colorBinghamton,colorBuffalo,colorCorning,colorGlensFalls,colorIthaca,colorJamestown,colorLakePlacid,colorLongIsland,colorMassena,colorNewYorkCity,colorNiagaraFalls,colorPlattsburgh,colorPoughkeepsie,colorRochester,colorSyracuse,colorWatertown) <span style="color: #333333">=</span> LED_Temp_Color(tempAlbany,humAlbany,windAlbany,cloudAlbany,tempBinghamton,humBinghamton,windBinghamton,cloudBinghamton,tempBuffalo,humBuffalo,windBuffalo,cloudBuffalo,tempCorning,humCorning,windCorning,cloudCorning,tempGlensFalls,humGlensFalls,windGlensFalls,cloudGlensFalls,tempIthaca,humIthaca,windIthaca,cloudIthaca,tempJamestown,humJamestown,windJamestown,cloudJamestown,tempLakePlacid,humLakePlacid,windLakePlacid,cloudLakePlacid,tempLongIsland,humLongIsland,windLongIsland,cloudLongIsland,tempMassena,humMassena,windMassena,cloudMassena,tempNewYorkCity,humNewYorkCity,windNewYorkCity,cloudNewYorkCity,tempNiagaraFalls,humNiagaraFalls,windNiagaraFalls,cloudNiagaraFalls,tempPlattsburgh,humPlattsburgh,windPlattsburgh,cloudPlattsburgh,tempPoughkeepsie,humPoughkeepsie,windPoughkeepsie,cloudPoughkeepsie,tempRochester,humRochester,windRochester,cloudRochester,tempSyracuse,humSyracuse,windSyracuse,cloudSyracuse,tempWatertown,humWatertown,windWatertown,cloudWatertown)
+
+<span style="color: #888888">#Humidity</span>
+(colorAlbany,colorBinghamton,colorBuffalo,colorCorning,colorGlensFalls,colorIthaca,colorJamestown,colorLakePlacid,colorLongIsland,colorMassena,colorNewYorkCity,colorNiagaraFalls,colorPlattsburgh,colorPoughkeepsie,colorRochester,colorSyracuse,colorWatertown) <span style="color: #333333">=</span> LED_Humid_Color(tempAlbany,humAlbany,windAlbany,cloudAlbany,tempBinghamton,humBinghamton,windBinghamton,cloudBinghamton,tempBuffalo,humBuffalo,windBuffalo,cloudBuffalo,tempCorning,humCorning,windCorning,cloudCorning,tempGlensFalls,humGlensFalls,windGlensFalls,cloudGlensFalls,tempIthaca,humIthaca,windIthaca,cloudIthaca,tempJamestown,humJamestown,windJamestown,cloudJamestown,tempLakePlacid,humLakePlacid,windLakePlacid,cloudLakePlacid,tempLongIsland,humLongIsland,windLongIsland,cloudLongIsland,tempMassena,humMassena,windMassena,cloudMassena,tempNewYorkCity,humNewYorkCity,windNewYorkCity,cloudNewYorkCity,tempNiagaraFalls,humNiagaraFalls,windNiagaraFalls,cloudNiagaraFalls,tempPlattsburgh,humPlattsburgh,windPlattsburgh,cloudPlattsburgh,tempPoughkeepsie,humPoughkeepsie,windPoughkeepsie,cloudPoughkeepsie,tempRochester,humRochester,windRochester,cloudRochester,tempSyracuse,humSyracuse,windSyracuse,cloudSyracuse,tempWatertown,humWatertown,windWatertown,cloudWatertown)
+
+<span style="color: #888888">#Wind</span>
+(colorAlbany,colorBinghamton,colorBuffalo,colorCorning,colorGlensFalls,colorIthaca,colorJamestown,colorLakePlacid,colorLongIsland,colorMassena,colorNewYorkCity,colorNiagaraFalls,colorPlattsburgh,colorPoughkeepsie,colorRochester,colorSyracuse,colorWatertown) <span style="color: #333333">=</span> LED_Wind_Color(tempAlbany,humAlbany,windAlbany,cloudAlbany,tempBinghamton,humBinghamton,windBinghamton,cloudBinghamton,tempBuffalo,humBuffalo,windBuffalo,cloudBuffalo,tempCorning,humCorning,windCorning,cloudCorning,tempGlensFalls,humGlensFalls,windGlensFalls,cloudGlensFalls,tempIthaca,humIthaca,windIthaca,cloudIthaca,tempJamestown,humJamestown,windJamestown,cloudJamestown,tempLakePlacid,humLakePlacid,windLakePlacid,cloudLakePlacid,tempLongIsland,humLongIsland,windLongIsland,cloudLongIsland,tempMassena,humMassena,windMassena,cloudMassena,tempNewYorkCity,humNewYorkCity,windNewYorkCity,cloudNewYorkCity,tempNiagaraFalls,humNiagaraFalls,windNiagaraFalls,cloudNiagaraFalls,tempPlattsburgh,humPlattsburgh,windPlattsburgh,cloudPlattsburgh,tempPoughkeepsie,humPoughkeepsie,windPoughkeepsie,cloudPoughkeepsie,tempRochester,humRochester,windRochester,cloudRochester,tempSyracuse,humSyracuse,windSyracuse,cloudSyracuse,tempWatertown,humWatertown,windWatertown,cloudWatertown)
+
+<span style="color: #888888">#Clouds</span>
+(colorAlbany,colorBinghamton,colorBuffalo,colorCorning,colorGlensFalls,colorIthaca,colorJamestown,colorLakePlacid,colorLongIsland,colorMassena,colorNewYorkCity,colorNiagaraFalls,colorPlattsburgh,colorPoughkeepsie,colorRochester,colorSyracuse,colorWatertown) <span style="color: #333333">=</span> LED_Cloud_Color(tempAlbany,humAlbany,windAlbany,cloudAlbany,tempBinghamton,humBinghamton,windBinghamton,cloudBinghamton,tempBuffalo,humBuffalo,windBuffalo,cloudBuffalo,tempCorning,humCorning,windCorning,cloudCorning,tempGlensFalls,humGlensFalls,windGlensFalls,cloudGlensFalls,tempIthaca,humIthaca,windIthaca,cloudIthaca,tempJamestown,humJamestown,windJamestown,cloudJamestown,tempLakePlacid,humLakePlacid,windLakePlacid,cloudLakePlacid,tempLongIsland,humLongIsland,windLongIsland,cloudLongIsland,tempMassena,humMassena,windMassena,cloudMassena,tempNewYorkCity,humNewYorkCity,windNewYorkCity,cloudNewYorkCity,tempNiagaraFalls,humNiagaraFalls,windNiagaraFalls,cloudNiagaraFalls,tempPlattsburgh,humPlattsburgh,windPlattsburgh,cloudPlattsburgh,tempPoughkeepsie,humPoughkeepsie,windPoughkeepsie,cloudPoughkeepsie,tempRochester,humRochester,windRochester,cloudRochester,tempSyracuse,humSyracuse,windSyracuse,cloudSyracuse,tempWatertown,humWatertown,windWatertown,cloudWatertown)
+
+<span style="color: #008800; font-weight: bold">print</span>(colorAlbany)
+
+<span style="color: #888888">## LEDs turn on ##</span>
+
+<span style="color: #888888">#Albany</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">16</span>, <span style="color: #0000DD; font-weight: bold">25</span>, <span style="color: #0000DD; font-weight: bold">17</span>, <span style="color: #0000DD; font-weight: bold">26</span>, colorAlbany)
+
+<span style="color: #888888">#Binghamton</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">12</span>, <span style="color: #0000DD; font-weight: bold">16</span>, <span style="color: #0000DD; font-weight: bold">13</span>, <span style="color: #0000DD; font-weight: bold">17</span>, colorBinghamton)
+
+<span style="color: #888888">#Buffalo</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">17</span>, <span style="color: #0000DD; font-weight: bold">4</span>, <span style="color: #0000DD; font-weight: bold">18</span>, <span style="color: #0000DD; font-weight: bold">5</span>, colorBuffalo)
+
+<span style="color: #888888">#Corning</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">12</span>, <span style="color: #0000DD; font-weight: bold">11</span>, <span style="color: #0000DD; font-weight: bold">13</span>, <span style="color: #0000DD; font-weight: bold">12</span>, colorCorning)
+
+<span style="color: #888888">#Glens Falls</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">20</span>, <span style="color: #0000DD; font-weight: bold">25</span>, <span style="color: #0000DD; font-weight: bold">21</span>, <span style="color: #0000DD; font-weight: bold">26</span>, colorGlensFalls)
+
+<span style="color: #888888">#Ithaca</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">14</span>, <span style="color: #0000DD; font-weight: bold">13</span>, <span style="color: #0000DD; font-weight: bold">15</span>, <span style="color: #0000DD; font-weight: bold">14</span>, colorIthaca)
+
+<span style="color: #888888">#Jamestown</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">11</span>, <span style="color: #0000DD; font-weight: bold">2</span>, <span style="color: #0000DD; font-weight: bold">12</span>, <span style="color: #0000DD; font-weight: bold">3</span>, colorJamestown)
+
+<span style="color: #888888">#Lake Placid</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">27</span>, <span style="color: #0000DD; font-weight: bold">23</span>, <span style="color: #0000DD; font-weight: bold">28</span>, <span style="color: #0000DD; font-weight: bold">24</span>, colorLakePlacid)
+
+<span style="color: #888888">#Long Island</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">4</span>, <span style="color: #0000DD; font-weight: bold">29</span>, <span style="color: #0000DD; font-weight: bold">5</span>, <span style="color: #0000DD; font-weight: bold">30</span>, colorLongIsland)
+
+<span style="color: #888888">#Massena</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">31</span>, <span style="color: #0000DD; font-weight: bold">19</span>, <span style="color: #0000DD; font-weight: bold">32</span>, <span style="color: #0000DD; font-weight: bold">20</span>, colorMassena)
+
+<span style="color: #888888">#New York City</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">3</span>, <span style="color: #0000DD; font-weight: bold">25</span>, <span style="color: #0000DD; font-weight: bold">4</span>, <span style="color: #0000DD; font-weight: bold">26</span>, colorNewYorkCity)
+
+<span style="color: #888888">#Niagara Falls</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">18</span>, <span style="color: #0000DD; font-weight: bold">3</span>, <span style="color: #0000DD; font-weight: bold">19</span>, <span style="color: #0000DD; font-weight: bold">4</span>, colorNiagaraFalls)
+
+<span style="color: #888888">#Plattsburgh</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">30</span>, <span style="color: #0000DD; font-weight: bold">25</span>, <span style="color: #0000DD; font-weight: bold">31</span>, <span style="color: #0000DD; font-weight: bold">26</span>, colorPlattsburgh)
+
+<span style="color: #888888">#Poughkeepsie</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">9</span>, <span style="color: #0000DD; font-weight: bold">24</span>, <span style="color: #0000DD; font-weight: bold">10</span>, <span style="color: #0000DD; font-weight: bold">25</span>, colorPoughkeepsie)
+
+<span style="color: #888888">#Rochester</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">19</span>, <span style="color: #0000DD; font-weight: bold">9</span>, <span style="color: #0000DD; font-weight: bold">20</span>, <span style="color: #0000DD; font-weight: bold">10</span>, colorRochester)
+
+<span style="color: #888888">#Syracuse</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">18</span>, <span style="color: #0000DD; font-weight: bold">15</span>, <span style="color: #0000DD; font-weight: bold">19</span>, <span style="color: #0000DD; font-weight: bold">16</span>, colorSyracuse)
+
+<span style="color: #888888">#Watertown</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">24</span>, <span style="color: #0000DD; font-weight: bold">15</span>, <span style="color: #0000DD; font-weight: bold">25</span>, <span style="color: #0000DD; font-weight: bold">16</span>, colorWatertown)
+
+<span style="color: #008800; font-weight: bold">while</span> <span style="color: #007020">True</span>:
+    refresh()
+</pre></div>
+
+			<h3 class="text-black mt-0">API.py</h3>
+<!-- HTML generated using hilite.me --><div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #DD4422">&#39;&#39;&#39;</span>
+<span style="color: #DD4422">Mikayla Lahr (mrl242) and Mahathi Andavolu (ma2339)</span>
+<span style="color: #DD4422">Final Project</span>
+<span style="color: #DD4422">December 10, 2024</span>
+
+<span style="color: #DD4422">Code to test API key data collection </span>
+
+<span style="color: #DD4422">Collecting Data From Full List of Cities and Towns used on Map </span>
+<span style="color: #DD4422">1. Albany</span>
+<span style="color: #DD4422">2. Binghamton</span>
+<span style="color: #DD4422">3. Buffalo</span>
+<span style="color: #DD4422">4. Corning </span>
+<span style="color: #DD4422">5. Glens Falls</span>
+<span style="color: #DD4422">6. Ithaca</span>
+<span style="color: #DD4422">7. Jamestown</span>
+<span style="color: #DD4422">8. Lake Placid</span>
+<span style="color: #DD4422">9. Long Island</span>
+<span style="color: #DD4422">10. Massena</span>
+<span style="color: #DD4422">11. New York City</span>
+<span style="color: #DD4422">12. Niagara Falls</span>
+<span style="color: #DD4422">13. Plattsburgh</span>
+<span style="color: #DD4422">14. Poughkeepsie</span>
+<span style="color: #DD4422">15. Rochester</span>
+<span style="color: #DD4422">16. Syracuse</span>
+<span style="color: #DD4422">17. Watertown</span>
+
+<span style="color: #DD4422">&#39;&#39;&#39;</span>
+
+<span style="color: #008800; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">requests</span> 
+<span style="color: #008800; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">json</span>
+<span style="color: #008800; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">time</span>
+
+code_running <span style="color: #333333">=</span> <span style="color: #007020">True</span>
+<span style="color: #008800; font-weight: bold">while</span> code_running:
+	api_key <span style="color: #333333">=</span> <span style="background-color: #fff0f0">&quot;35be87b0b778052cced6dbaee988b31b&quot;</span>
+	responseAlbany <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Albany&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+	responseBinghamton <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Binghamton&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+	responseBuffalo <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Buffalo&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+	responseCorning <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Corning&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+	responseGlensFalls <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Glens Falls&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+	responseIthaca <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Ithaca&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+	responseJamestown <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Jamestown&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+	responseLakePlacid <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Lake Placid&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+	responseLongIsland <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Long Island&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+	responseMassena <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Massena&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+	responseNewYorkCity <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=New York City&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+	responseNiagaraFalls <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Niagara Falls&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+	responsePlattsburgh <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Plattsburgh&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+	responsePoughkeepsie <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Poughkeepsie&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)	
+	responseRochester <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Rochester&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+	responseSyracuse <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Syracuse&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+	responseWatertown <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Watertown&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+	responseDelhi <span style="color: #333333">=</span> requests<span style="color: #333333">.</span>get(f<span style="background-color: #fff0f0">&quot;https://api.openweathermap.org/data/2.5/weather?q=Delhi&amp;limit=1&amp;appid={api_key}&quot;</span>,verify<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+	
+	rAlbany <span style="color: #333333">=</span> responseAlbany<span style="color: #333333">.</span>status_code
+	rBinghamton <span style="color: #333333">=</span> responseBinghamton<span style="color: #333333">.</span>status_code
+	rBuffalo <span style="color: #333333">=</span> responseBuffalo<span style="color: #333333">.</span>status_code
+	rCorning <span style="color: #333333">=</span> responseCorning<span style="color: #333333">.</span>status_code
+	rGlensFalls <span style="color: #333333">=</span> responseGlensFalls<span style="color: #333333">.</span>status_code
+	rIthaca <span style="color: #333333">=</span> responseIthaca<span style="color: #333333">.</span>status_code
+	rJamestown <span style="color: #333333">=</span> responseJamestown<span style="color: #333333">.</span>status_code
+	rLakePlacid <span style="color: #333333">=</span> responseLakePlacid<span style="color: #333333">.</span>status_code
+	rLongIsland <span style="color: #333333">=</span> responseLongIsland<span style="color: #333333">.</span>status_code
+	rMassena <span style="color: #333333">=</span> responseMassena<span style="color: #333333">.</span>status_code
+	rNewYorkCity <span style="color: #333333">=</span> responseNewYorkCity<span style="color: #333333">.</span>status_code
+	rNiagaraFalls <span style="color: #333333">=</span> responseNiagaraFalls<span style="color: #333333">.</span>status_code
+	rPlattsburgh <span style="color: #333333">=</span> responsePlattsburgh<span style="color: #333333">.</span>status_code
+	rPoughkeepsie <span style="color: #333333">=</span> responsePoughkeepsie<span style="color: #333333">.</span>status_code
+	rRochester <span style="color: #333333">=</span> responseRochester<span style="color: #333333">.</span>status_code
+	rSyracuse <span style="color: #333333">=</span> responseSyracuse<span style="color: #333333">.</span>status_code
+	rWatertown <span style="color: #333333">=</span> responseWatertown<span style="color: #333333">.</span>status_code
+	rDelhi <span style="color: #333333">=</span> responseDelhi<span style="color: #333333">.</span>status_code
+
+	<span style="color: #008800; font-weight: bold">print</span>(rAlbany); <span style="color: #008800; font-weight: bold">print</span>(rBinghamton); <span style="color: #008800; font-weight: bold">print</span>(rBuffalo); <span style="color: #008800; font-weight: bold">print</span>(rCorning); <span style="color: #008800; font-weight: bold">print</span>(rGlensFalls);
+	<span style="color: #008800; font-weight: bold">print</span>(rIthaca); <span style="color: #008800; font-weight: bold">print</span>(rJamestown); <span style="color: #008800; font-weight: bold">print</span>(rLakePlacid); <span style="color: #008800; font-weight: bold">print</span>(rLongIsland); 
+	<span style="color: #008800; font-weight: bold">print</span>(rMassena); <span style="color: #008800; font-weight: bold">print</span>(rNewYorkCity); <span style="color: #008800; font-weight: bold">print</span>(rNiagaraFalls); <span style="color: #008800; font-weight: bold">print</span>(rPlattsburgh);
+	<span style="color: #008800; font-weight: bold">print</span>(rPoughkeepsie); <span style="color: #008800; font-weight: bold">print</span>(rRochester); <span style="color: #008800; font-weight: bold">print</span>(rSyracuse); <span style="color: #008800; font-weight: bold">print</span>(rWatertown); <span style="color: #008800; font-weight: bold">print</span>(rDelhi)
+	
+	<span style="color: #008800; font-weight: bold">if</span> rAlbany <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rBinghamton <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rBuffalo <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rCorning <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rGlensFalls <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rIthaca <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rJamestown <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rLakePlacid <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rLongIsland <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rMassena <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rNewYorkCity <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rNiagaraFalls <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rPlattsburgh <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rPoughkeepsie <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rRochester <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rSyracuse <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span> <span style="color: #333333">&amp;</span> rWatertown <span style="color: #333333">==</span> <span style="color: #0000DD; font-weight: bold">200</span>:
+		code_running <span style="color: #333333">=</span> <span style="color: #007020">False</span>
+		<span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;Albany&quot;</span>); <span style="color: #008800; font-weight: bold">print</span>(responseAlbany<span style="color: #333333">.</span>json())
+		<span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;Binghamton&quot;</span>); <span style="color: #008800; font-weight: bold">print</span>(responseBinghamton<span style="color: #333333">.</span>json())
+		<span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;Buffalo&quot;</span>); <span style="color: #008800; font-weight: bold">print</span>(responseBuffalo<span style="color: #333333">.</span>json())
+		<span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;Corning&quot;</span>); <span style="color: #008800; font-weight: bold">print</span>(responseCorning<span style="color: #333333">.</span>json())
+		<span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;Gelns Falls&quot;</span>); <span style="color: #008800; font-weight: bold">print</span>(responseGlensFalls<span style="color: #333333">.</span>json())
+		<span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;Ithaca&quot;</span>); <span style="color: #008800; font-weight: bold">print</span>(responseIthaca<span style="color: #333333">.</span>json())
+		<span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;Jamestown&quot;</span>); <span style="color: #008800; font-weight: bold">print</span>(responseJamestown<span style="color: #333333">.</span>json())
+		<span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;Lake Placid&quot;</span>); <span style="color: #008800; font-weight: bold">print</span>(responseLakePlacid<span style="color: #333333">.</span>json())
+		<span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;Long Island&quot;</span>); <span style="color: #008800; font-weight: bold">print</span>(responseLongIsland<span style="color: #333333">.</span>json())
+		<span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;Massena&quot;</span>); <span style="color: #008800; font-weight: bold">print</span>(responseMassena<span style="color: #333333">.</span>json())
+		<span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;New York City&quot;</span>); <span style="color: #008800; font-weight: bold">print</span>(responseNewYorkCity<span style="color: #333333">.</span>json())
+		<span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;Niagara Falls&quot;</span>); <span style="color: #008800; font-weight: bold">print</span>(responseNiagaraFalls<span style="color: #333333">.</span>json())
+		<span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;Plattsburgh&quot;</span>); <span style="color: #008800; font-weight: bold">print</span>(responsePlattsburgh<span style="color: #333333">.</span>json())
+		<span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;Poughkeepsie&quot;</span>); <span style="color: #008800; font-weight: bold">print</span>(responsePoughkeepsie<span style="color: #333333">.</span>json())
+		<span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;Rochester&quot;</span>); <span style="color: #008800; font-weight: bold">print</span>(responseRochester<span style="color: #333333">.</span>json())
+		<span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;Syracuse&quot;</span>); <span style="color: #008800; font-weight: bold">print</span>(responseSyracuse<span style="color: #333333">.</span>json())
+		<span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;Watertown&quot;</span>); <span style="color: #008800; font-weight: bold">print</span>(responseWatertown<span style="color: #333333">.</span>json())
+		<span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;Delhi&quot;</span>); <span style="color: #008800; font-weight: bold">print</span>(responseDelhi<span style="color: #333333">.</span>json())
+		
+	time<span style="color: #333333">.</span>sleep(<span style="color: #6600EE; font-weight: bold">0.5</span>)
+</pre></div>
+
+
+		<h3 class="text-black mt-0">workingLED.py</h3>
+<!-- HTML generated using hilite.me --><div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #DD4422">&#39;&#39;&#39;</span>
+<span style="color: #DD4422">Mikayla Lahr (mrl242) and Mahathi Andavolu (ma2339)</span>
+<span style="color: #DD4422">Final Project</span>
+<span style="color: #DD4422">December 10, 2024</span>
+
+<span style="color: #DD4422">Code used to find location placement for LEDs</span>
+
+<span style="color: #DD4422">Referenced code written by Simon Monk on Adafruit</span>
+<span style="color: #DD4422">## Example LED testing code by Simon Monk</span>
+<span style="color: #DD4422">## From https://learn.adafruit.com/connecting-a-16x32-rgb-led-matrix-panel-to-a-raspberry-pi/experimental-python-code </span>
+
+
+<span style="color: #DD4422">Cities and Towns used on Map </span>
+<span style="color: #DD4422">1. Albany</span>
+<span style="color: #DD4422">2. Binghamton</span>
+<span style="color: #DD4422">3. Buffalo</span>
+<span style="color: #DD4422">4. Corning </span>
+<span style="color: #DD4422">5. Glens Falls</span>
+<span style="color: #DD4422">6. Ithaca</span>
+<span style="color: #DD4422">7. Jamestown</span>
+<span style="color: #DD4422">8. Lake Placid</span>
+<span style="color: #DD4422">9. Long Island</span>
+<span style="color: #DD4422">10. Massena</span>
+<span style="color: #DD4422">11. New York City</span>
+<span style="color: #DD4422">12. Niagara Falls</span>
+<span style="color: #DD4422">13. Plattsburgh</span>
+<span style="color: #DD4422">14. Poughkeepsie</span>
+<span style="color: #DD4422">15. Rochester</span>
+<span style="color: #DD4422">16. Syracuse</span>
+<span style="color: #DD4422">17. Watertown</span>
+
+<span style="color: #DD4422">&#39;&#39;&#39;</span>
+
+<span style="color: #008800; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">RPi.GPIO</span> <span style="color: #008800; font-weight: bold">as</span> <span style="color: #0e84b5; font-weight: bold">GPIO</span>
+<span style="color: #008800; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">time</span>
+
+delay <span style="color: #333333">=</span> <span style="color: #6600EE; font-weight: bold">0.000001</span>
+
+GPIO<span style="color: #333333">.</span>setmode(GPIO<span style="color: #333333">.</span>BCM)
+red1_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">5</span>
+green1_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">13</span>
+blue1_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">6</span>
+red2_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">12</span>
+green2_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">16</span>
+blue2_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">23</span>
+clock_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">17</span>
+a_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">22</span>
+b_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">26</span>
+c_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">27</span>
+d_pin  <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">20</span>
+latch_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">21</span>
+oe_pin <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">4</span>
+
+GPIO<span style="color: #333333">.</span>setup(red1_pin, GPIO<span style="color: #333333">.</span>OUT)
+GPIO<span style="color: #333333">.</span>setup(green1_pin, GPIO<span style="color: #333333">.</span>OUT)
+GPIO<span style="color: #333333">.</span>setup(blue1_pin, GPIO<span style="color: #333333">.</span>OUT)
+GPIO<span style="color: #333333">.</span>setup(red2_pin, GPIO<span style="color: #333333">.</span>OUT)
+GPIO<span style="color: #333333">.</span>setup(green2_pin, GPIO<span style="color: #333333">.</span>OUT)
+GPIO<span style="color: #333333">.</span>setup(blue2_pin, GPIO<span style="color: #333333">.</span>OUT)
+GPIO<span style="color: #333333">.</span>setup(clock_pin, GPIO<span style="color: #333333">.</span>OUT)
+GPIO<span style="color: #333333">.</span>setup(a_pin, GPIO<span style="color: #333333">.</span>OUT)
+GPIO<span style="color: #333333">.</span>setup(b_pin, GPIO<span style="color: #333333">.</span>OUT)
+GPIO<span style="color: #333333">.</span>setup(c_pin, GPIO<span style="color: #333333">.</span>OUT)
+GPIO<span style="color: #333333">.</span>setup(d_pin, GPIO<span style="color: #333333">.</span>OUT)
+GPIO<span style="color: #333333">.</span>setup(latch_pin, GPIO<span style="color: #333333">.</span>OUT)
+GPIO<span style="color: #333333">.</span>setup(oe_pin, GPIO<span style="color: #333333">.</span>OUT)
+
+
+screen <span style="color: #333333">=</span> [[<span style="color: #0000DD; font-weight: bold">0</span> <span style="color: #008800; font-weight: bold">for</span> x <span style="color: #000000; font-weight: bold">in</span> <span style="color: #007020">range</span>(<span style="color: #0000DD; font-weight: bold">32</span>)] <span style="color: #008800; font-weight: bold">for</span> x <span style="color: #000000; font-weight: bold">in</span> <span style="color: #007020">range</span>(<span style="color: #0000DD; font-weight: bold">32</span>)]
+
+<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">clock</span>():
+    GPIO<span style="color: #333333">.</span>output(clock_pin, <span style="color: #0000DD; font-weight: bold">1</span>)
+    GPIO<span style="color: #333333">.</span>output(clock_pin, <span style="color: #0000DD; font-weight: bold">0</span>)
+
+<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">latch</span>():
+    GPIO<span style="color: #333333">.</span>output(latch_pin, <span style="color: #0000DD; font-weight: bold">1</span>)
+    GPIO<span style="color: #333333">.</span>output(latch_pin, <span style="color: #0000DD; font-weight: bold">0</span>)
+
+<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">bits_from_int_row</span>(x):
+    a_bit <span style="color: #333333">=</span> x <span style="color: #333333">&amp;</span> <span style="color: #0000DD; font-weight: bold">1</span>
+    b_bit <span style="color: #333333">=</span> x <span style="color: #333333">&amp;</span> <span style="color: #0000DD; font-weight: bold">2</span>
+    c_bit <span style="color: #333333">=</span> x <span style="color: #333333">&amp;</span> <span style="color: #0000DD; font-weight: bold">4</span>
+    d_bit <span style="color: #333333">=</span> x <span style="color: #333333">&amp;</span> <span style="color: #0000DD; font-weight: bold">8</span>
+    <span style="color: #008800; font-weight: bold">return</span> (a_bit, b_bit, c_bit, d_bit)
+    
+<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">bits_from_int_color</span>(x):
+    red <span style="color: #333333">=</span> x <span style="color: #333333">&amp;</span> <span style="color: #0000DD; font-weight: bold">1</span>
+    green <span style="color: #333333">=</span> x <span style="color: #333333">&amp;</span> <span style="color: #0000DD; font-weight: bold">2</span>
+    blue <span style="color: #333333">=</span> x <span style="color: #333333">&amp;</span> <span style="color: #0000DD; font-weight: bold">4</span>
+    <span style="color: #008800; font-weight: bold">return</span> (red,green,blue)
+
+<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">set_row</span>(row):
+    <span style="color: #888888">#time.sleep(delay)</span>
+    a_bit, b_bit, c_bit, d_bit <span style="color: #333333">=</span> bits_from_int_row(row)
+    GPIO<span style="color: #333333">.</span>output(a_pin, a_bit)
+    GPIO<span style="color: #333333">.</span>output(b_pin, b_bit)
+    GPIO<span style="color: #333333">.</span>output(c_pin, c_bit)
+    GPIO<span style="color: #333333">.</span>output(d_pin, d_bit)
+    <span style="color: #888888">#time.sleep(delay)</span>
+
+<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">set_color_top</span>(color):
+    <span style="color: #888888">#time.sleep(delay)</span>
+    red, green, blue <span style="color: #333333">=</span> bits_from_int_color(color)
+    GPIO<span style="color: #333333">.</span>output(red1_pin, red)
+    GPIO<span style="color: #333333">.</span>output(green1_pin, green)
+    GPIO<span style="color: #333333">.</span>output(blue1_pin, blue)
+    <span style="color: #888888">#time.sleep(delay)</span>
+
+<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">set_color_bottom</span>(color):
+    <span style="color: #888888">#time.sleep(delay)</span>
+    red, green, blue <span style="color: #333333">=</span> bits_from_int_color(color)
+    GPIO<span style="color: #333333">.</span>output(red2_pin, red)
+    GPIO<span style="color: #333333">.</span>output(green2_pin, green)
+    GPIO<span style="color: #333333">.</span>output(blue2_pin, blue)
+    <span style="color: #888888">#time.sleep(delay)</span>
+
+<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">refresh</span>():
+    <span style="color: #008800; font-weight: bold">for</span> row <span style="color: #000000; font-weight: bold">in</span> <span style="color: #007020">range</span>(<span style="color: #0000DD; font-weight: bold">16</span>):
+        GPIO<span style="color: #333333">.</span>output(oe_pin, <span style="color: #0000DD; font-weight: bold">1</span>)
+        set_color_top(<span style="color: #0000DD; font-weight: bold">0</span>)
+        set_row(row)
+        <span style="color: #888888">#time.sleep(delay)</span>
+        <span style="color: #008800; font-weight: bold">for</span> col <span style="color: #000000; font-weight: bold">in</span> <span style="color: #007020">range</span>(<span style="color: #0000DD; font-weight: bold">32</span>):
+            set_color_top(screen[row][col])
+            set_color_bottom(screen[row<span style="color: #333333">+</span><span style="color: #0000DD; font-weight: bold">16</span>][col])
+            clock()
+        <span style="color: #888888">#GPIO.output(oe_pin, 0)</span>
+        latch()
+        GPIO<span style="color: #333333">.</span>output(oe_pin, <span style="color: #0000DD; font-weight: bold">0</span>)
+        time<span style="color: #333333">.</span>sleep(delay)
+
+<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">fill_rectangle</span>(x1, y1, x2, y2, color):
+    <span style="color: #008800; font-weight: bold">for</span> x <span style="color: #000000; font-weight: bold">in</span> <span style="color: #007020">range</span>(x1, x2):
+        <span style="color: #008800; font-weight: bold">for</span> y <span style="color: #000000; font-weight: bold">in</span> <span style="color: #007020">range</span>(y1, y2):
+            screen[y][x] <span style="color: #333333">=</span> color
+
+
+<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">set_pixel</span>(x, y, color):
+    screen[y][x] <span style="color: #333333">=</span> color
+    
+
+color <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+<span style="color: #888888">#Albany</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">16</span>, <span style="color: #0000DD; font-weight: bold">25</span>, <span style="color: #0000DD; font-weight: bold">17</span>, <span style="color: #0000DD; font-weight: bold">26</span>, color)
+
+<span style="color: #888888">#Binghamton</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">12</span>, <span style="color: #0000DD; font-weight: bold">16</span>, <span style="color: #0000DD; font-weight: bold">13</span>, <span style="color: #0000DD; font-weight: bold">17</span>, color)
+
+<span style="color: #888888">#Buffalo</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">17</span>, <span style="color: #0000DD; font-weight: bold">4</span>, <span style="color: #0000DD; font-weight: bold">18</span>, <span style="color: #0000DD; font-weight: bold">5</span>, color)
+
+<span style="color: #888888">#Corning</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">12</span>, <span style="color: #0000DD; font-weight: bold">11</span>, <span style="color: #0000DD; font-weight: bold">13</span>, <span style="color: #0000DD; font-weight: bold">12</span>, color)
+
+<span style="color: #888888">#Glens Falls</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">20</span>, <span style="color: #0000DD; font-weight: bold">25</span>, <span style="color: #0000DD; font-weight: bold">21</span>, <span style="color: #0000DD; font-weight: bold">26</span>, color)
+
+<span style="color: #888888">#Ithaca</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">14</span>, <span style="color: #0000DD; font-weight: bold">13</span>, <span style="color: #0000DD; font-weight: bold">15</span>, <span style="color: #0000DD; font-weight: bold">14</span>, color)
+
+<span style="color: #888888">#Jamestown</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">11</span>, <span style="color: #0000DD; font-weight: bold">2</span>, <span style="color: #0000DD; font-weight: bold">12</span>, <span style="color: #0000DD; font-weight: bold">3</span>, color)
+
+<span style="color: #888888">#Lake Placid</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">27</span>, <span style="color: #0000DD; font-weight: bold">23</span>, <span style="color: #0000DD; font-weight: bold">28</span>, <span style="color: #0000DD; font-weight: bold">24</span>, color)
+
+<span style="color: #888888">#Long Island</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">4</span>, <span style="color: #0000DD; font-weight: bold">29</span>, <span style="color: #0000DD; font-weight: bold">5</span>, <span style="color: #0000DD; font-weight: bold">30</span>, color)
+
+<span style="color: #888888">#Massena</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">31</span>, <span style="color: #0000DD; font-weight: bold">19</span>, <span style="color: #0000DD; font-weight: bold">32</span>, <span style="color: #0000DD; font-weight: bold">20</span>, color)
+
+<span style="color: #888888">#New York City</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">3</span>, <span style="color: #0000DD; font-weight: bold">25</span>, <span style="color: #0000DD; font-weight: bold">4</span>, <span style="color: #0000DD; font-weight: bold">26</span>, color)
+
+<span style="color: #888888">#Niagara Falls</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">18</span>, <span style="color: #0000DD; font-weight: bold">3</span>, <span style="color: #0000DD; font-weight: bold">19</span>, <span style="color: #0000DD; font-weight: bold">4</span>, color)
+
+<span style="color: #888888">#Plattsburgh</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">30</span>, <span style="color: #0000DD; font-weight: bold">25</span>, <span style="color: #0000DD; font-weight: bold">31</span>, <span style="color: #0000DD; font-weight: bold">26</span>, color)
+
+<span style="color: #888888">#Poughkeepsie</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">9</span>, <span style="color: #0000DD; font-weight: bold">24</span>, <span style="color: #0000DD; font-weight: bold">10</span>, <span style="color: #0000DD; font-weight: bold">25</span>, color)
+
+<span style="color: #888888">#Rochester</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">19</span>, <span style="color: #0000DD; font-weight: bold">9</span>, <span style="color: #0000DD; font-weight: bold">20</span>, <span style="color: #0000DD; font-weight: bold">10</span>, color)
+
+<span style="color: #888888">#Syracuse</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">18</span>, <span style="color: #0000DD; font-weight: bold">15</span>, <span style="color: #0000DD; font-weight: bold">19</span>, <span style="color: #0000DD; font-weight: bold">16</span>, color)
+
+<span style="color: #888888">#Watertown</span>
+fill_rectangle(<span style="color: #0000DD; font-weight: bold">24</span>, <span style="color: #0000DD; font-weight: bold">15</span>, <span style="color: #0000DD; font-weight: bold">25</span>, <span style="color: #0000DD; font-weight: bold">16</span>, color)
+
+<span style="color: #008800; font-weight: bold">while</span> <span style="color: #007020">True</span>:
+    refresh()
+    
+</pre></div>
+
+
                     </div>
-                    <div class="col-lg-8 text-left">
-                        <p class="text-black-75 mb-4">testLED.py</p>
-                        <p>workingLED.py</p>
-                        <p>getCity.py</p>
-                        <p>API.py</p>
-                        <p>API_with_LED.py</p>
-                        <p>screen_with_LED.py</p>
-                    </div>
+                    
                 </div>
             </div>
         </section>
