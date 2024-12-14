@@ -588,6 +588,19 @@ progress {
   text-transform: uppercase;
 }
 
+.column {
+  float: left;
+  width: 50%;
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+
 .blockquote {
   margin-bottom: 1rem;
   font-size: 1.25rem;
