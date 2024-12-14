@@ -172,7 +172,7 @@
                         </div>
                         <div class="col-lg-8 text-center">
                             <p>Figure 1: Hardware System</p>
-			<img width="350" height="auto" src="assets/img/hardware.png"></img>
+			<img width="500" height="auto" src="assets/img/hardware.png"></img>
                         </div>
                         <div class="col-lg-8 text-left">
                             <p>Below is a table indicating what GPIO pins on the Raspberry-Pi were used to connect to the pins on the LED matrix.</p>
@@ -256,15 +256,16 @@
                           	<td>Ground</td>
                           </tr>
                         </table>
+				<p>Note: The report of Tyler Bisk, Fall 2023, for "Live Scoreboard on Raspberry Pi" was referenced when setting up the hardware. [1]</p>
                         </div>
                          <div class="col-lg-8 text-left">
                           <br>
                          <p>The hardware was tested by using a python code from Adafruit found <a href="https://learn.adafruit.com/connecting-a-16x32-rgb-led-matrix-panel-to-a-raspberry-pi/experimental-python-code">here.</a>
-                             The example code is attached at the end of the report called testLED.py
-                         </p>
+                         [2] [3]
+			 </p>
                         <p>When testing the code we saw several LEDs light up in colors red, white, and green. The code was written for a 16x32 LED
                                 matrix, which resulted some of the LEDs not turning on during the initial test. We changed the code to be correctly sized 
-                                for a 32x32 LED matrix by changing the range and adding a d_pin to 'set_row()' in the code. 
+                                for a 32x32 LED matrix by changing the range and adding a d_pin to 'set_row()' in the example test code. 
                         </p>
                         <p>During testing of the hardware we initially used a power supply that was powered by the lab power supply. At times, the LED 
                                 matrix would not turn on when powered if there was not enough voltage from the power supply. We switched the power supply to 
@@ -278,7 +279,7 @@
                         <div class="col-lg-8 text-left">
                         <b>Setup API Key</b>
                         <p class="text-black-75 mb-4">The first step for software testing that was performed was getting an API key and collecting weather data.
-                            We signed up for an account on Open Weather Map and got an API key from the website. The free plan allows for 60 calls a minute 
+                            We signed up for an account on Open Weather Map and got an API key from the website. [4] The free plan allows for 60 calls a minute 
                             and 1,000,000 calls a month. The API key was implemented in the code API.py and API_with_LED.py that can be found at the end 
                             of the report. Throughout our progress on this project we made several updates to how we implemented the API call. Initially we 
                             used the latitude and longitude coordinates for the API call for the starting locations, such as in the below line of code. 
@@ -312,7 +313,8 @@
                             
                         <b>Setup LED Map</b>
                         <p>After working on setting up the API key, we worked on mapping out the LEDs that are used for each of the 17 locations. To plan out the LEDs 
-                            the code workingLED.py was reate. This code is a modified version of the code testLED.py. The areas chosen as locations are listed below.
+                            the code workingLED.py was create. This code is attatched at the end of the lab report and was modified by the Adafruit code by Simon Monk. [2]
+				The areas chosen as locations are listed below.
                         </p>
                         <li>Albany</li>
                         <li>Binghamton</li>
@@ -676,10 +678,10 @@
                         <hr class="divider divider-dark" /> 
                     </div>
                      <div class="col-lg-8 text-left">
-                        <p class="text-black-75 mb-4">[1]</p>
-                      <p>[2]</p>
-                      <p>[3]</p>
-                      <p>[4]</p>
+                        <p class="text-black-75 mb-4">[1] T. Bisk, “Live Scoreboard on Raspberry Pi,” <i>Live Scoreboard on Raspberry Pi</i>, Dec. 05, 2023. <a href="https://courses.ece.cornell.edu/ece5990/ECE5725_Fall2023_Projects/2%20Wednesday%20December%206/1%20Live%20Scoreboard/M_tjb/report.html">https://courses.ece.cornell.edu/ece5990/ECE5725_Fall2023_Projects/2%20Wednesday%20December%206/1%20Live%20Scoreboard/M_tjb/report.html</a> </p>
+                      <p>[2] S. Monk, “Connecting a 16x32 RGB LED Matrix Panel to a Raspberry Pi,” Adafruit Learning System, Mar. 13, 2014. <a href="https://learn.adafruit.com/connecting-a-16x32-rgb-led-matrix-panel-to-a-raspberry-pi/experimental-python-code">https://learn.adafruit.com/connecting-a-16x32-rgb-led-matrix-panel-to-a-raspberry-pi/experimental-python-code</a> (accessed Dec. 14, 2024).</p>
+                      <p>[3] “RGB LED Matrix Basics,” Adafruit Learning System. <a href="https://learn.adafruit.com/32x16-32x32-rgb-led-matrix/overview">https://learn.adafruit.com/32x16-32x32-rgb-led-matrix/overview</a></p>
+                      <p>[4] OpenWeatherMap.org, “Сurrent weather and forecast - OpenWeatherMap,” Openweathermap.org, 2012. <a href="https://openweathermap.org/">https://openweathermap.org/</a></p>
                         <!-- <a class="btn btn-light btn-xl" href="#services">Get Started!</a> -->
                      </div>
                 </div>
